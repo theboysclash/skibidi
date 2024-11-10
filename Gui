@@ -1,0 +1,202 @@
+local SimpleUI = {
+    elements = {},
+    theme = {
+        primary = {1, 0.4, 0, 1}, -- Orange
+        secondary = {0.2, 0.6, 1, 1}, -- Blue
+        text = {1, 1, 1, 1}, -- White
+        background = {0.1, 0.1, 0.1, 1}, -- Dark Gray
+        disabled = {0.5, 0.5, 0.5, 1} -- Gray
+    }
+}
+
+-- Base Element Class
+local Element = {}
+Element.__index = Element
+
+function Element.new(x, y, width, height)
+    local self = setmetatable({}, Element)
+    self.x = x or 0
+    self.y = y or 0
+    self.width = width or 100
+    self.height = height or 40
+    self.visible = true
+    self.enabled = true
+    return self
+end
+
+-- Button Class
+local Button = setmetatable({}, {__index = Element})
+Button.__index = Button
+
+function SimpleUI.newButton(x, y, width, height, text)
+    local self = setmetatable(Element.new(x, y, width, height), Button)
+    self.text = text or "Button"
+    self.isPressed = false
+    self.isHovered = false
+    self.onClick = function() end
+    self.type = "button"
+    table.insert(SimpleUI.elements, self)
+    return self
+end
+
+-- Toggle Button Class
+local ToggleButton = setmetatable({}, {__index = Element})
+ToggleButton.__index = ToggleButton
+
+function SimpleUI.newToggle(x, y, width, height, text)
+    local self = setmetatable(Element.new(x, y, width, height), ToggleButton)
+    self.text = text or "Toggle"
+    self.isOn = false
+    self.onToggle = function() end
+    self.type = "toggle"
+    table.insert(SimpleUI.elements, self)
+    return self
+end
+
+-- Label Class
+local Label = setmetatable({}, {__index = Element})
+Label.__index = Label
+
+function SimpleUI.newLabel(x, y, text, size)
+    local self = setmetatable(Element.new(x, y), Label)
+    self.text = text or "Label"
+    self.size = size or 16
+    self.type = "label"
+    table.insert(SimpleUI.elements, self)
+    return self
+end
+
+-- Input Field Class
+local InputField = setmetatable({}, {__index = Element})
+InputField.__index = InputField
+
+function SimpleUI.newInput(x, y, width, height, placeholder)
+    local self = setmetatable(Element.new(x, y, width, height), InputField)
+    self.text = ""
+    self.placeholder = placeholder or "Enter text..."
+    self.isFocused = false
+    self.type = "input"
+    table.insert(SimpleUI.elements, self)
+    return self
+end
+
+-- Drawing Functions
+function Button:draw()
+    if not self.visible then return end
+    
+    local color = self.enabled and SimpleUI.theme.primary or SimpleUI.theme.disabled
+    if self.isPressed then
+        color = {color[1] * 0.8, color[2] * 0.8, color[3] * 0.8, color[4]}
+    elseif self.isHovered then
+        color = {color[1] * 1.2, color[2] * 1.2, color[3] * 1.2, color[4]}
+    end
+    
+    love.graphics.setColor(color)
+    love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+    
+    love.graphics.setColor(SimpleUI.theme.text)
+    love.graphics.printf(self.text, self.x, self.y + self.height/3, self.width, "center")
+end
+
+function ToggleButton:draw()
+    if not self.visible then return end
+    
+    local color = self.isOn and SimpleUI.theme.secondary or SimpleUI.theme.primary
+    if not self.enabled then color = SimpleUI.theme.disabled end
+    
+    love.graphics.setColor(color)
+    love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+    
+    love.graphics.setColor(SimpleUI.theme.text)
+    love.graphics.printf(self.text, self.x, self.y + self.height/3, self.width, "center")
+end
+
+function Label:draw()
+    if not self.visible then return end
+    love.graphics.setColor(SimpleUI.theme.text)
+    love.graphics.print(self.text, self.x, self.y)
+end
+
+function InputField:draw()
+    if not self.visible then return end
+    
+    local color = self.isFocused and SimpleUI.theme.secondary or SimpleUI.theme.primary
+    if not self.enabled then color = SimpleUI.theme.disabled end
+    
+    love.graphics.setColor(color)
+    love.graphics.rectangle("line", self.x, self.y, self.width, self.height)
+    
+    love.graphics.setColor(SimpleUI.theme.text)
+    local displayText = self.text
+    if displayText == "" and not self.isFocused then
+        love.graphics.setColor(0.5, 0.5, 0.5, 1)
+        displayText = self.placeholder
+    end
+    love.graphics.printf(displayText, self.x + 5, self.y + self.height/3, self.width - 10, "left")
+end
+
+-- Update Functions
+function SimpleUI.update(dt)
+    local mx, my = love.mouse.getPosition()
+    
+    for _, element in ipairs(SimpleUI.elements) do
+        if element.type == "button" or element.type == "toggle" then
+            element.isHovered = mx >= element.x and mx <= element.x + element.width and
+                               my >= element.y and my <= element.y + element.height
+        end
+    end
+end
+
+-- Input Handling
+function SimpleUI.mousepressed(x, y, button)
+    if button ~= 1 then return end
+    
+    for _, element in ipairs(SimpleUI.elements) do
+        if element.enabled and element.visible then
+            if x >= element.x and x <= element.x + element.width and
+               y >= element.y and y <= element.y + element.height then
+                if element.type == "button" then
+                    element.isPressed = true
+                    element:onClick()
+                elseif element.type == "toggle" then
+                    element.isOn = not element.isOn
+                    element:onToggle(element.isOn)
+                elseif element.type == "input" then
+                    element.isFocused = true
+                end
+            elseif element.type == "input" then
+                element.isFocused = false
+            end
+        end
+    end
+end
+
+function SimpleUI.mousereleased(x, y, button)
+    if button ~= 1 then return end
+    
+    for _, element in ipairs(SimpleUI.elements) do
+        if element.type == "button" then
+            element.isPressed = false
+        end
+    end
+end
+
+function SimpleUI.textinput(text)
+    for _, element in ipairs(SimpleUI.elements) do
+        if element.type == "input" and element.isFocused and element.enabled then
+            element.text = element.text .. text
+        end
+    end
+end
+
+function SimpleUI.keypressed(key)
+    for _, element in ipairs(SimpleUI.elements) do
+        if element.type == "input" and element.isFocused and element.enabled then
+            if key == "backspace" then
+                element.text = string.sub(element.text, 1, -2)
+            end
+        end
+    end
+end
+
+return SimpleUI
