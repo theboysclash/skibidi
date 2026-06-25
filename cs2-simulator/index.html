@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2 Case Opening Simulator</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="logo">🎯</span>
+            <h1>CS2 CASE SIMULATOR</h1>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#home" data-page="home">Home</a></li>
+            <li><a href="#cases" data-page="cases">Cases</a></li>
+            <li><a href="#inventory" data-page="inventory">Inventory</a></li>
+            <li><a href="#statistics" data-page="statistics">Statistics</a></li>
+            <li><a href="#achievements" data-page="achievements">Achievements</a></li>
+            <li><a href="#verification" data-page="verification">Verification</a></li>
+            <li><a href="#settings" data-page="settings">Settings</a></li>
+        </ul>
+        <div class="nav-right">
+            <div class="wallet-display">
+                <span class="wallet-label">Balance:</span>
+                <span class="wallet-amount" id="walletAmount">$0.00</span>
+            </div>
+            <button class="btn-deposit" id="btnDeposit">+</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Home Page -->
+        <section id="home" class="page active">
+            <div class="hero-section">
+                <h2>Welcome to CS2 Case Simulator</h2>
+                <p>Experience realistic case opening with provably fair odds</p>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <h3 id="totalCasesOpened">0</h3>
+                        <p>Cases Opened</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalProfit">$0.00</h3>
+                        <p>Total Profit</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="bestDrop">N/A</h3>
+                        <p>Best Drop</p>
+                    </div>
+                </div>
+                <button class="btn-primary btn-large" id="btnOpenCaseNow">Open Case Now</button>
+            </div>
+            
+            <!-- Recent Drops Feed -->
+            <div class="recent-drops">
+                <h3>Recent Drops</h3>
+                <div class="drops-feed" id="dropsFeed"></div>
+            </div>
+        </section>
+
+        <!-- Cases Page -->
+        <section id="cases" class="page">
+            <div class="page-header">
+                <h2>Choose Your Case</h2>
+                <div class="search-filter">
+                    <input type="text" id="caseSearch" placeholder="Search cases...">
+                    <select id="caseFilter">
+                        <option value="all">All Cases</option>
+                    </select>
+                </div>
+            </div>
+            <div class="cases-grid" id="casesGrid"></div>
+        </section>
+
+        <!-- Open Case Page -->
+        <section id="open-case" class="page">
+            <div class="case-opening-container">
+                <div class="case-info">
+                    <h2 id="openingCaseName">Case Name</h2>
+                    <p id="openingCasePrice">$0.00</p>
+                </div>
+                
+                <!-- Spinner Container -->
+                <div class="spinner-container">
+                    <div class="center-marker"></div>
+                    <div class="spinner-reel" id="spinnerReel"></div>
+                    <div class="spinner-overlay"></div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="opening-controls">
+                    <div class="quantity-selector">
+                        <button class="btn-qty" data-qty="1">1x</button>
+                        <button class="btn-qty" data-qty="5">5x</button>
+                        <button class="btn-qty" data-qty="10">10x</button>
+                    </div>
+                    <div class="mode-toggles">
+                        <label class="toggle">
+                            <input type="checkbox" id="fastOpenMode">
+                            <span class="toggle-slider"></span>
+                            Fast Mode
+                        </label>
+                        <label class="toggle">
+                            <input type="checkbox" id="autoOpenMode">
+                            <span class="toggle-slider"></span>
+                            Auto Mode
+                        </label>
+                    </div>
+                    <button class="btn-open" id="btnOpenCase">OPEN CASE</button>
+                </div>
+                
+                <!-- Result Display -->
+                <div class="result-display" id="resultDisplay">
+                    <div class="item-card result-card" id="resultCard"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventory Page -->
+        <section id="inventory" class="page">
+            <div class="page-header">
+                <h2>Your Inventory</h2>
+                <div class="inventory-controls">
+                    <input type="text" id="inventorySearch" placeholder="Search items...">
+                    <select id="inventorySort">
+                        <option value="date-desc">Newest First</option>
+                        <option value="date-asc">Oldest First</option>
+                        <option value="value-desc">Highest Value</option>
+                        <option value="value-asc">Lowest Value</option>
+                        <option value="rarity-desc">Rarest First</option>
+                    </select>
+                    <button class="btn-secondary" id="btnSellSelected">Sell Selected</button>
+                    <button class="btn-secondary" id="btnSellAll">Sell All</button>
+                    <button class="btn-secondary" id="btnExportInventory">Export</button>
+                    <button class="btn-secondary" id="btnImportInventory">Import</button>
+                </div>
+            </div>
+            <div class="inventory-grid" id="inventoryGrid"></div>
+            <div class="pagination" id="inventoryPagination"></div>
+        </section>
+
+        <!-- Statistics Page -->
+        <section id="statistics" class="page">
+            <div class="stats-container">
+                <h2>Statistics Dashboard</h2>
+                
+                <div class="stats-overview">
+                    <div class="stat-box">
+                        <h4>Cases Opened</h4>
+                        <p id="statCasesOpened">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Total Spent</h4>
+                        <p id="statTotalSpent">$0.00</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Total Earned</h4>
+                        <p id="statTotalEarned">$0.00</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>ROI</h4>
+                        <p id="statROI">0%</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Avg Item Value</h4>
+                        <p id="statAvgValue">$0.00</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Inventory Value</h4>
+                        <p id="statInventoryValue">$0.00</p>
+                    </div>
+                </div>
+                
+                <div class="charts-container">
+                    <div class="chart-wrapper">
+                        <h3>Rarity Distribution</h3>
+                        <canvas id="rarityChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Value Distribution</h3>
+                        <canvas id="valueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievements Page -->
+        <section id="achievements" class="page">
+            <h2>Achievements</h2>
+            <div class="achievements-grid" id="achievementsGrid"></div>
+        </section>
+
+        <!-- Verification Page -->
+        <section id="verification" class="page">
+            <div class="verification-container">
+                <h2>Provably Fair Verification</h2>
+                
+                <div class="provably-fair-info">
+                    <div class="pf-field">
+                        <label>Server Seed Hash:</label>
+                        <input type="text" id="serverSeedHash" readonly>
+                    </div>
+                    <div class="pf-field">
+                        <label>Client Seed:</label>
+                        <input type="text" id="clientSeed" value="default-client-seed">
+                        <button class="btn-small" id="btnGenerateClientSeed">Generate New</button>
+                    </div>
+                    <div class="pf-field">
+                        <label>Nonce:</label>
+                        <input type="number" id="currentNonce" readonly>
+                    </div>
+                </div>
+                
+                <div class="verification-form">
+                    <h3>Verify Previous Roll</h3>
+                    <div class="pf-field">
+                        <label>Server Seed:</label>
+                        <input type="text" id="verifyServerSeed" placeholder="Enter revealed server seed">
+                    </div>
+                    <div class="pf-field">
+                        <label>Client Seed:</label>
+                        <input type="text" id="verifyClientSeed" placeholder="Enter client seed">
+                    </div>
+                    <div class="pf-field">
+                        <label>Nonce:</label>
+                        <input type="number" id="verifyNonce" placeholder="Enter nonce">
+                    </div>
+                    <button class="btn-primary" id="btnVerify">Verify</button>
+                    <div class="verification-result" id="verificationResult"></div>
+                </div>
+                
+                <div class="roll-history">
+                    <h3>Roll History</h3>
+                    <div id="rollHistoryList"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Page -->
+        <section id="settings" class="page">
+            <h2>Settings</h2>
+            
+            <div class="settings-group">
+                <h3>Audio Settings</h3>
+                <div class="setting-item">
+                    <label>Master Volume</label>
+                    <input type="range" id="masterVolume" min="0" max="100" value="50">
+                    <span id="volumeValue">50%</span>
+                </div>
+                <div class="setting-item">
+                    <label>Mute All</label>
+                    <input type="checkbox" id="muteAll">
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Visual Settings</h3>
+                <div class="setting-item">
+                    <label>Theme</label>
+                    <select id="themeSelect">
+                        <option value="dark">Dark (Default)</option>
+                        <option value="light">Light</option>
+                        <option value="blue">Blue Steel</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Reduce Motion</label>
+                    <input type="checkbox" id="reduceMotion">
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Data Management</h3>
+                <button class="btn-danger" id="btnResetData">Reset All Data</button>
+                <button class="btn-danger" id="btnClearInventory">Clear Inventory</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Item Inspection Modal -->
+    <div class="modal" id="itemModal">
+        <div class="modal-content item-inspection">
+            <span class="modal-close" id="modalClose">&times;</span>
+            <div class="item-preview">
+                <div class="item-image-large" id="modalItemImage"></div>
+                <div class="item-details">
+                    <h2 id="modalItemName">Item Name</h2>
+                    <p class="item-rarity" id="modalItemRarity">Rarity</p>
+                    <div class="item-stats">
+                        <div class="stat-row">
+                            <span>Float Value:</span>
+                            <span id="modalItemFloat">0.000000</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Wear Condition:</span>
+                            <span id="modalItemWear">Factory New</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Pattern ID:</span>
+                            <span id="modalItemPattern">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Market Value:</span>
+                            <span id="modalItemValue">$0.00</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Date Obtained:</span>
+                            <span id="modalItemDate">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Case Source:</span>
+                            <span id="modalItemCase">-</span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-sell" id="modalBtnSell">Sell Item</button>
+                        <button class="btn-secondary" id="modalBtnFavorite">★ Favorite</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content deposit-modal">
+            <span class="modal-close" id="depositModalClose">&times;</span>
+            <h2>Add Funds</h2>
+            <div class="deposit-amounts">
+                <button class="btn-deposit-amount" data-amount="10">$10</button>
+                <button class="btn-deposit-amount" data-amount="25">$25</button>
+                <button class="btn-deposit-amount" data-amount="50">$50</button>
+                <button class="btn-deposit-amount" data-amount="100">$100</button>
+                <button class="btn-deposit-amount" data-amount="500">$500</button>
+            </div>
+            <div class="custom-deposit">
+                <input type="number" id="customDepositAmount" placeholder="Custom amount" min="1">
+                <button class="btn-primary" id="btnCustomDeposit">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Notification -->
+    <div class="achievement-notification" id="achievementNotification">
+        <div class="achievement-icon">🏆</div>
+        <div class="achievement-text">
+            <h4 id="achievementTitle">Achievement Unlocked!</h4>
+            <p id="achievementDescription">Description</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 CS2 Case Simulator. This is a fan-made simulator and is not affiliated with Valve Corporation.</p>
+        <p>All game assets are property of their respective owners.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/provably-fair.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/spinner.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/statistics.js"></script>
+    <script src="js/achievements.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

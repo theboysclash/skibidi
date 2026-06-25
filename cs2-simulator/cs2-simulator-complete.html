@@ -1,0 +1,4766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2 Case Opening Simulator</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="logo">🎯</span>
+            <h1>CS2 CASE SIMULATOR</h1>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#home" data-page="home">Home</a></li>
+            <li><a href="#cases" data-page="cases">Cases</a></li>
+            <li><a href="#inventory" data-page="inventory">Inventory</a></li>
+            <li><a href="#statistics" data-page="statistics">Statistics</a></li>
+            <li><a href="#achievements" data-page="achievements">Achievements</a></li>
+            <li><a href="#verification" data-page="verification">Verification</a></li>
+            <li><a href="#settings" data-page="settings">Settings</a></li>
+        </ul>
+        <div class="nav-right">
+            <div class="wallet-display">
+                <span class="wallet-label">Balance:</span>
+                <span class="wallet-amount" id="walletAmount">$0.00</span>
+            </div>
+            <button class="btn-deposit" id="btnDeposit">+</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Home Page -->
+        <section id="home" class="page active">
+            <div class="hero-section">
+                <h2>Welcome to CS2 Case Simulator</h2>
+                <p>Experience realistic case opening with provably fair odds</p>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <h3 id="totalCasesOpened">0</h3>
+                        <p>Cases Opened</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalProfit">$0.00</h3>
+                        <p>Total Profit</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="bestDrop">N/A</h3>
+                        <p>Best Drop</p>
+                    </div>
+                </div>
+                <button class="btn-primary btn-large" id="btnOpenCaseNow">Open Case Now</button>
+            </div>
+            
+            <!-- Recent Drops Feed -->
+            <div class="recent-drops">
+                <h3>Recent Drops</h3>
+                <div class="drops-feed" id="dropsFeed"></div>
+            </div>
+        </section>
+
+        <!-- Cases Page -->
+        <section id="cases" class="page">
+            <div class="page-header">
+                <h2>Choose Your Case</h2>
+                <div class="search-filter">
+                    <input type="text" id="caseSearch" placeholder="Search cases...">
+                    <select id="caseFilter">
+                        <option value="all">All Cases</option>
+                    </select>
+                </div>
+            </div>
+            <div class="cases-grid" id="casesGrid"></div>
+        </section>
+
+        <!-- Open Case Page -->
+        <section id="open-case" class="page">
+            <div class="case-opening-container">
+                <div class="case-info">
+                    <h2 id="openingCaseName">Case Name</h2>
+                    <p id="openingCasePrice">$0.00</p>
+                </div>
+                
+                <!-- Spinner Container -->
+                <div class="spinner-container">
+                    <div class="center-marker"></div>
+                    <div class="spinner-reel" id="spinnerReel"></div>
+                    <div class="spinner-overlay"></div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="opening-controls">
+                    <div class="quantity-selector">
+                        <button class="btn-qty" data-qty="1">1x</button>
+                        <button class="btn-qty" data-qty="5">5x</button>
+                        <button class="btn-qty" data-qty="10">10x</button>
+                    </div>
+                    <div class="mode-toggles">
+                        <label class="toggle">
+                            <input type="checkbox" id="fastOpenMode">
+                            <span class="toggle-slider"></span>
+                            Fast Mode
+                        </label>
+                        <label class="toggle">
+                            <input type="checkbox" id="autoOpenMode">
+                            <span class="toggle-slider"></span>
+                            Auto Mode
+                        </label>
+                    </div>
+                    <button class="btn-open" id="btnOpenCase">OPEN CASE</button>
+                </div>
+                
+                <!-- Result Display -->
+                <div class="result-display" id="resultDisplay">
+                    <div class="item-card result-card" id="resultCard"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventory Page -->
+        <section id="inventory" class="page">
+            <div class="page-header">
+                <h2>Your Inventory</h2>
+                <div class="inventory-controls">
+                    <input type="text" id="inventorySearch" placeholder="Search items...">
+                    <select id="inventorySort">
+                        <option value="date-desc">Newest First</option>
+                        <option value="date-asc">Oldest First</option>
+                        <option value="value-desc">Highest Value</option>
+                        <option value="value-asc">Lowest Value</option>
+                        <option value="rarity-desc">Rarest First</option>
+                    </select>
+                    <button class="btn-secondary" id="btnSellSelected">Sell Selected</button>
+                    <button class="btn-secondary" id="btnSellAll">Sell All</button>
+                    <button class="btn-secondary" id="btnExportInventory">Export</button>
+                    <button class="btn-secondary" id="btnImportInventory">Import</button>
+                </div>
+            </div>
+            <div class="inventory-grid" id="inventoryGrid"></div>
+            <div class="pagination" id="inventoryPagination"></div>
+        </section>
+
+        <!-- Statistics Page -->
+        <section id="statistics" class="page">
+            <div class="stats-container">
+                <h2>Statistics Dashboard</h2>
+                
+                <div class="stats-overview">
+                    <div class="stat-box">
+                        <h4>Cases Opened</h4>
+                        <p id="statCasesOpened">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Total Spent</h4>
+                        <p id="statTotalSpent">$0.00</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Total Earned</h4>
+                        <p id="statTotalEarned">$0.00</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>ROI</h4>
+                        <p id="statROI">0%</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Avg Item Value</h4>
+                        <p id="statAvgValue">$0.00</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Inventory Value</h4>
+                        <p id="statInventoryValue">$0.00</p>
+                    </div>
+                </div>
+                
+                <div class="charts-container">
+                    <div class="chart-wrapper">
+                        <h3>Rarity Distribution</h3>
+                        <canvas id="rarityChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>Value Distribution</h3>
+                        <canvas id="valueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievements Page -->
+        <section id="achievements" class="page">
+            <h2>Achievements</h2>
+            <div class="achievements-grid" id="achievementsGrid"></div>
+        </section>
+
+        <!-- Verification Page -->
+        <section id="verification" class="page">
+            <div class="verification-container">
+                <h2>Provably Fair Verification</h2>
+                
+                <div class="provably-fair-info">
+                    <div class="pf-field">
+                        <label>Server Seed Hash:</label>
+                        <input type="text" id="serverSeedHash" readonly>
+                    </div>
+                    <div class="pf-field">
+                        <label>Client Seed:</label>
+                        <input type="text" id="clientSeed" value="default-client-seed">
+                        <button class="btn-small" id="btnGenerateClientSeed">Generate New</button>
+                    </div>
+                    <div class="pf-field">
+                        <label>Nonce:</label>
+                        <input type="number" id="currentNonce" readonly>
+                    </div>
+                </div>
+                
+                <div class="verification-form">
+                    <h3>Verify Previous Roll</h3>
+                    <div class="pf-field">
+                        <label>Server Seed:</label>
+                        <input type="text" id="verifyServerSeed" placeholder="Enter revealed server seed">
+                    </div>
+                    <div class="pf-field">
+                        <label>Client Seed:</label>
+                        <input type="text" id="verifyClientSeed" placeholder="Enter client seed">
+                    </div>
+                    <div class="pf-field">
+                        <label>Nonce:</label>
+                        <input type="number" id="verifyNonce" placeholder="Enter nonce">
+                    </div>
+                    <button class="btn-primary" id="btnVerify">Verify</button>
+                    <div class="verification-result" id="verificationResult"></div>
+                </div>
+                
+                <div class="roll-history">
+                    <h3>Roll History</h3>
+                    <div id="rollHistoryList"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Page -->
+        <section id="settings" class="page">
+            <h2>Settings</h2>
+            
+            <div class="settings-group">
+                <h3>Audio Settings</h3>
+                <div class="setting-item">
+                    <label>Master Volume</label>
+                    <input type="range" id="masterVolume" min="0" max="100" value="50">
+                    <span id="volumeValue">50%</span>
+                </div>
+                <div class="setting-item">
+                    <label>Mute All</label>
+                    <input type="checkbox" id="muteAll">
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Visual Settings</h3>
+                <div class="setting-item">
+                    <label>Theme</label>
+                    <select id="themeSelect">
+                        <option value="dark">Dark (Default)</option>
+                        <option value="light">Light</option>
+                        <option value="blue">Blue Steel</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Reduce Motion</label>
+                    <input type="checkbox" id="reduceMotion">
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Data Management</h3>
+                <button class="btn-danger" id="btnResetData">Reset All Data</button>
+                <button class="btn-danger" id="btnClearInventory">Clear Inventory</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Item Inspection Modal -->
+    <div class="modal" id="itemModal">
+        <div class="modal-content item-inspection">
+            <span class="modal-close" id="modalClose">&times;</span>
+            <div class="item-preview">
+                <div class="item-image-large" id="modalItemImage"></div>
+                <div class="item-details">
+                    <h2 id="modalItemName">Item Name</h2>
+                    <p class="item-rarity" id="modalItemRarity">Rarity</p>
+                    <div class="item-stats">
+                        <div class="stat-row">
+                            <span>Float Value:</span>
+                            <span id="modalItemFloat">0.000000</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Wear Condition:</span>
+                            <span id="modalItemWear">Factory New</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Pattern ID:</span>
+                            <span id="modalItemPattern">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Market Value:</span>
+                            <span id="modalItemValue">$0.00</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Date Obtained:</span>
+                            <span id="modalItemDate">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Case Source:</span>
+                            <span id="modalItemCase">-</span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-sell" id="modalBtnSell">Sell Item</button>
+                        <button class="btn-secondary" id="modalBtnFavorite">★ Favorite</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content deposit-modal">
+            <span class="modal-close" id="depositModalClose">&times;</span>
+            <h2>Add Funds</h2>
+            <div class="deposit-amounts">
+                <button class="btn-deposit-amount" data-amount="10">$10</button>
+                <button class="btn-deposit-amount" data-amount="25">$25</button>
+                <button class="btn-deposit-amount" data-amount="50">$50</button>
+                <button class="btn-deposit-amount" data-amount="100">$100</button>
+                <button class="btn-deposit-amount" data-amount="500">$500</button>
+            </div>
+            <div class="custom-deposit">
+                <input type="number" id="customDepositAmount" placeholder="Custom amount" min="1">
+                <button class="btn-primary" id="btnCustomDeposit">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Notification -->
+    <div class="achievement-notification" id="achievementNotification">
+        <div class="achievement-icon">🏆</div>
+        <div class="achievement-text">
+            <h4 id="achievementTitle">Achievement Unlocked!</h4>
+            <p id="achievementDescription">Description</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 CS2 Case Simulator. This is a fan-made simulator and is not affiliated with Valve Corporation.</p>
+        <p>All game assets are property of their respective owners.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/provably-fair.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/spinner.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/statistics.js"></script>
+    <script src="js/achievements.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+/* ============================================
+   CS2 Case Opening Simulator - Main Stylesheet
+   ============================================ */
+
+/* CSS Variables for theming */
+:root {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-tertiary: #0f3460;
+    --text-primary: #ffffff;
+    --text-secondary: #b8b8b8;
+    --accent-orange: #ff6b35;
+    --accent-gold: #ffd700;
+    --rarity-gray: #b0b0b0;
+    --rarity-light-blue: #4b69ff;
+    --rarity-blue: #4b69ff;
+    --rarity-purple: #8847ff;
+    --rarity-pink: #d32ce6;
+    --rarity-red: #eb4b4b;
+    --rarity-gold: #ffd700;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e0e0e0;
+    --text-primary: #1a1a2e;
+    --text-secondary: #666666;
+}
+
+/* Blue Steel Theme */
+[data-theme="blue"] {
+    --bg-primary: #0a1628;
+    --bg-secondary: #1a2a4a;
+    --bg-tertiary: #2a3a5a;
+    --accent-orange: #4a9eff;
+}
+
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-orange);
+    border-radius: 4px;
+}
+
+/* ============================================
+   Navigation
+   ============================================ */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo {
+    font-size: 2rem;
+}
+
+.nav-brand h1 {
+    font-size: 1.5rem;
+    background: linear-gradient(45deg, var(--accent-orange), var(--accent-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 1rem;
+}
+
+.nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: var(--transition-fast);
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--text-primary);
+    background: var(--glass-bg);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.wallet-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--glass-bg);
+    border-radius: 5px;
+    border: 1px solid var(--glass-border);
+}
+
+.wallet-amount {
+    color: var(--accent-gold);
+    font-weight: bold;
+}
+
+.btn-deposit {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(45deg, var(--accent-orange), var(--accent-gold));
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-deposit:hover {
+    transform: scale(1.1);
+}
+
+/* ============================================
+   Main Content
+   ============================================ */
+.main-content {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.page.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   Home Page
+   ============================================ */
+.hero-section {
+    text-align: center;
+    padding: 3rem;
+    background: var(--glass-bg);
+    border-radius: 15px;
+    border: 1px solid var(--glass-border);
+    margin-bottom: 2rem;
+}
+
+.hero-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, var(--accent-orange), var(--accent-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background: var(--glass-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+}
+
+.stat-card h3 {
+    font-size: 2rem;
+    color: var(--accent-orange);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--accent-orange), var(--accent-gold));
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+}
+
+.btn-large {
+    font-size: 1.3rem;
+    padding: 1.2rem 3rem;
+}
+
+.recent-drops {
+    background: var(--glass-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+}
+
+.drops-feed {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding: 1rem 0;
+}
+
+/* ============================================
+   Cases Grid
+   ============================================ */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.search-filter {
+    display: flex;
+    gap: 1rem;
+}
+
+.search-filter input,
+.search-filter select {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 5px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.cases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.case-card {
+    background: var(--glass-bg);
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.case-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+    transform: translateX(-100%);
+    transition: var(--transition-slow);
+}
+
+.case-card:hover::before {
+    transform: translateX(100%);
+}
+
+.case-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-orange);
+    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+}
+
+.case-image {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 1rem;
+    background: radial-gradient(circle, var(--accent-orange) 0%, transparent 70%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.case-price {
+    color: var(--accent-gold);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* ============================================
+   Case Opening - Spinner
+   ============================================ */
+.case-opening-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.spinner-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    border: 2px solid var(--glass-border);
+    overflow: hidden;
+    margin: 2rem 0;
+}
+
+.center-marker {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent-gold);
+    transform: translateX(-50%);
+    z-index: 10;
+    box-shadow: 0 0 20px var(--accent-gold);
+}
+
+.center-marker::before {
+    content: '▼';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--accent-gold);
+    font-size: 1.5rem;
+}
+
+.center-marker::after {
+    content: '▲';
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--accent-gold);
+    font-size: 1.5rem;
+}
+
+.spinner-reel {
+    display: flex;
+    height: 100%;
+    position: absolute;
+    left: 50%;
+    will-change: transform;
+}
+
+.spinner-item {
+    width: 150px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--glass-border);
+    flex-shrink: 0;
+    position: relative;
+}
+
+.spinner-item-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    background: var(--glass-bg);
+}
+
+.spinner-item-name {
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 0 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.rarity-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.opening-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.quantity-selector {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-qty {
+    padding: 0.5rem 1.5rem;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-qty:hover,
+.btn-qty.active {
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+}
+
+.mode-toggles {
+    display: flex;
+    gap: 2rem;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.toggle input {
+    display: none;
+}
+
+.toggle-slider {
+    width: 50px;
+    height: 25px;
+    background: var(--bg-tertiary);
+    border-radius: 25px;
+    position: relative;
+    transition: var(--transition-fast);
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    top: 2.5px;
+    left: 2.5px;
+    transition: var(--transition-fast);
+}
+
+.toggle input:checked + .toggle-slider {
+    background: var(--accent-orange);
+}
+
+.toggle input:checked + .toggle-slider::before {
+    transform: translateX(25px);
+}
+
+.btn-open {
+    background: linear-gradient(45deg, var(--accent-orange), var(--accent-gold));
+    color: white;
+    border: none;
+    padding: 1.5rem 4rem;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.btn-open:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 10px 40px rgba(255, 107, 53, 0.5);
+}
+
+.btn-open:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.result-display {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.result-card {
+    transform: scale(0);
+    transition: var(--transition-slow);
+}
+
+.result-card.show {
+    transform: scale(1);
+    animation: itemReveal 0.5s ease;
+}
+
+@keyframes itemReveal {
+    0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+    50% { transform: scale(1.1) rotate(5deg); }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* Gold Item Effects */
+.gold-reveal {
+    animation: goldReveal 1s ease infinite;
+}
+
+@keyframes goldReveal {
+    0%, 100% { box-shadow: 0 0 50px var(--accent-gold); }
+    50% { box-shadow: 0 0 100px var(--accent-gold), 0 0 150px var(--accent-orange); }
+}
+
+.particle-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--accent-gold);
+    border-radius: 50%;
+    animation: particleFall 3s ease-out forwards;
+}
+
+@keyframes particleFall {
+    0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ============================================
+   Inventory
+   ============================================ */
+.inventory-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.item-card {
+    background: var(--glass-bg);
+    border-radius: 10px;
+    border: 2px solid var(--glass-border);
+    padding: 1rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    position: relative;
+}
+
+.item-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-orange);
+}
+
+.item-card.selected {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.item-card-image {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    background: var(--bg-secondary);
+}
+
+.item-card-name {
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-card-value {
+    color: var(--accent-gold);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.item-card-float {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-page {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-page:hover,
+.btn-page.active {
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+}
+
+/* ============================================
+   Statistics
+   ============================================ */
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-box {
+    background: var(--glass-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid var(--glass-border);
+}
+
+.stat-box h4 {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-box p {
+    font-size: 1.5rem;
+    color: var(--accent-orange);
+}
+
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.chart-wrapper {
+    background: var(--glass-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+}
+
+/* ============================================
+   Achievements
+   ============================================ */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.achievement-card {
+    background: var(--glass-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: var(--transition-fast);
+}
+
+.achievement-card.unlocked {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+.achievement-card.locked {
+    opacity: 0.5;
+}
+
+.achievement-icon {
+    font-size: 3rem;
+}
+
+.achievement-info h4 {
+    margin-bottom: 0.3rem;
+}
+
+.achievement-info p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.achievement-notification {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(45deg, var(--accent-orange), var(--accent-gold));
+    padding: 1.5rem 2rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 10000;
+    transition: var(--transition-slow);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.achievement-notification.show {
+    bottom: 2rem;
+}
+
+/* ============================================
+   Verification
+   ============================================ */
+.verification-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.provably-fair-info,
+.verification-form {
+    background: var(--glass-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    margin-bottom: 2rem;
+}
+
+.pf-field {
+    margin-bottom: 1rem;
+}
+
+.pf-field label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.pf-field input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 5px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-small {
+    padding: 0.3rem 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.verification-result {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 5px;
+    display: none;
+}
+
+.verification-result.success {
+    display: block;
+    background: rgba(0, 255, 0, 0.1);
+    border: 1px solid #00ff00;
+}
+
+.verification-result.error {
+    display: block;
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid #ff0000;
+}
+
+.roll-history {
+    background: var(--glass-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+}
+
+/* ============================================
+   Settings
+   ============================================ */
+.settings-group {
+    background: var(--glass-bg);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    margin-bottom: 1.5rem;
+}
+
+.settings-group h3 {
+    margin-bottom: 1rem;
+    color: var(--accent-orange);
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.setting-item input[type="range"] {
+    width: 200px;
+}
+
+.btn-danger {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    margin-right: 1rem;
+}
+
+.btn-danger:hover {
+    background: #cc0000;
+}
+
+/* ============================================
+   Modals
+   ============================================ */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+    animation: modalSlide 0.3s ease;
+}
+
+@keyframes modalSlide {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: var(--transition-fast);
+}
+
+.modal-close:hover {
+    color: var(--accent-orange);
+}
+
+.item-preview {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.item-image-large {
+    width: 300px;
+    height: 300px;
+    background: var(--bg-tertiary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+}
+
+.item-details h2 {
+    margin-bottom: 0.5rem;
+}
+
+.item-rarity {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.item-stats {
+    margin-bottom: 1.5rem;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.item-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-sell {
+    background: var(--accent-orange);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-sell:hover {
+    background: var(--accent-gold);
+}
+
+.deposit-amounts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.btn-deposit-amount {
+    padding: 1rem;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-size: 1.1rem;
+}
+
+.btn-deposit-amount:hover {
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+}
+
+.custom-deposit {
+    display: flex;
+    gap: 1rem;
+}
+
+.custom-deposit input {
+    flex: 1;
+    padding: 0.8rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 5px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+.footer {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 3rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--glass-border);
+}
+
+/* ============================================
+   Rarity Colors
+   ============================================ */
+.rarity-consumer { border-color: var(--rarity-gray) !important; }
+.rarity-industrial { border-color: var(--rarity-light-blue) !important; }
+.rarity-milspec { border-color: var(--rarity-blue) !important; }
+.rarity-restricted { border-color: var(--rarity-purple) !important; }
+.rarity-classified { border-color: var(--rarity-pink) !important; }
+.rarity-covert { border-color: var(--rarity-red) !important; }
+.rarity-gold { border-color: var(--rarity-gold) !important; }
+
+.bg-consumer { background-color: var(--rarity-gray) !important; }
+.bg-industrial { background-color: var(--rarity-light-blue) !important; }
+.bg-milspec { background-color: var(--rarity-blue) !important; }
+.bg-restricted { background-color: var(--rarity-purple) !important; }
+.bg-classified { background-color: var(--rarity-pink) !important; }
+.bg-covert { background-color: var(--rarity-red) !important; }
+.bg-gold { background-color: var(--rarity-gold) !important; }
+
+.text-consumer { color: var(--rarity-gray) !important; }
+.text-industrial { color: var(--rarity-light-blue) !important; }
+.text-milspec { color: var(--rarity-blue) !important; }
+.text-restricted { color: var(--rarity-purple) !important; }
+.text-classified { color: var(--rarity-pink) !important; }
+.text-covert { color: var(--rarity-red) !important; }
+.text-gold { color: var(--rarity-gold) !important; }
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .hero-section h2 {
+        font-size: 1.8rem;
+    }
+    
+    .spinner-container {
+        height: 150px;
+    }
+    
+    .spinner-item {
+        width: 100px;
+    }
+    
+    .item-preview {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+.hidden {
+    display: none !important;
+}
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+/**
+ * CS2 Case Opening Simulator - Data Module
+ * Contains all case definitions, items, and configuration
+ */
+
+// Rarity definitions with probabilities and colors
+const RARITIES = {
+    CONSUMER: { 
+        id: 'consumer', 
+        name: 'Consumer Grade', 
+        probability: 0.7992, 
+        color: '#b0b0b0',
+        multiplier: 0.5
+    },
+    INDUSTRIAL: { 
+        id: 'industrial', 
+        name: 'Industrial Grade', 
+        probability: 0.1598, 
+        color: '#4b69ff',
+        multiplier: 1
+    },
+    MILSPEC: { 
+        id: 'milspec', 
+        name: 'Mil-Spec', 
+        probability: 0.0320, 
+        color: '#4b69ff',
+        multiplier: 2
+    },
+    RESTRICTED: { 
+        id: 'restricted', 
+        name: 'Restricted', 
+        probability: 0.0064, 
+        color: '#8847ff',
+        multiplier: 5
+    },
+    CLASSIFIED: { 
+        id: 'classified', 
+        name: 'Classified', 
+        probability: 0.0026, 
+        color: '#d32ce6',
+        multiplier: 10
+    },
+    COVERT: { 
+        id: 'covert', 
+        name: 'Covert', 
+        probability: 0.0010, 
+        color: '#eb4b4b',
+        multiplier: 50
+    },
+    GOLD: { 
+        id: 'gold', 
+        name: 'Special Item', 
+        probability: 0.0002, 
+        color: '#ffd700',
+        multiplier: 200
+    }
+};
+
+// Wear condition thresholds
+const WEAR_CONDITIONS = [
+    { name: 'Factory New', min: 0.00, max: 0.07 },
+    { name: 'Minimal Wear', min: 0.07, max: 0.15 },
+    { name: 'Field-Tested', min: 0.15, max: 0.38 },
+    { name: 'Well-Worn', min: 0.38, max: 0.45 },
+    { name: 'Battle-Scarred', min: 0.45, max: 1.00 }
+];
+
+// Weapon types for generating item names
+const WEAPON_TYPES = [
+    'AK-47', 'M4A4', 'M4A1-S', 'AWP', 'USP-S', 'Glock-18',
+    'Desert Eagle', 'P250', 'Five-SeveN', 'Tec-9',
+    'MP9', 'MAC-10', 'UMP-45', 'PP-Bizon',
+    'XM1014', 'MAG-7', 'Nova', 'Sawed-Off',
+    'FAMAS', 'Galil AR', 'SSG 08', 'SCAR-20',
+    'Negev', 'M249', 'CZ75-Auto', 'R8 Revolver',
+    'Knife', 'Gloves'
+];
+
+// Skin name prefixes for generation
+const SKIN_PREFIXES = [
+    'Redline', 'Asiimov', 'Hyper Beast', 'Dragon Lore',
+    'Fade', 'Doppler', 'Marble Fade', 'Tiger Tooth',
+    'Blue Laminate', 'Red Laminate', 'Ultraviolet',
+    'Case Hardened', 'Slaughter', 'Night', 'Boreal Forest',
+    'Forest DDPAT', 'Scorched', 'Stained', 'Rust Coat',
+    'Crimson Web', 'Gamma Doppler', 'Lore', 'Black Laminate',
+    'Aquamarine Revenge', 'Bloodsport', 'Neo-Noir', 'Printstream',
+    'Chantico\'s Fire', 'Volcanic', 'Fire Serpent', 'Wraith King',
+    'Gold Arabesque', 'Sweet Tooth', 'Momentum', 'Phantom',
+    'Nitro', 'Corticera', 'Pulse', 'Elite Build',
+    'Sand Dune', 'Urban Masked', 'Colony', 'Blue Steel'
+];
+
+// Case definitions
+const CASES = [
+    {
+        id: 'phoenix',
+        name: 'Phoenix Case',
+        price: 2.49,
+        image: '🔥',
+        description: 'The Phoenix Collection',
+        items: generateCaseItems('Phoenix', 30)
+    },
+    {
+        id: 'breakout',
+        name: 'Breakout Case',
+        price: 1.99,
+        image: '💥',
+        description: 'The Breakout Collection',
+        items: generateCaseItems('Breakout', 25)
+    },
+    {
+        id: 'huntsman',
+        name: 'Huntsman Case',
+        price: 1.49,
+        image: '🏹',
+        description: 'The Huntsman Collection',
+        items: generateCaseItems('Huntsman', 28)
+    },
+    {
+        id: 'chroma',
+        name: 'Chroma Case',
+        price: 0.99,
+        image: '🌈',
+        description: 'The Chroma Collection',
+        items: generateCaseItems('Chroma', 32)
+    },
+    {
+        id: 'shadow',
+        name: 'Shadow Case',
+        price: 1.29,
+        image: '👤',
+        description: 'The Shadow Collection',
+        items: generateCaseItems('Shadow', 26)
+    },
+    {
+        id: 'revolution',
+        name: 'Revolution Case',
+        price: 2.99,
+        image: '⚡',
+        description: 'The Revolution Collection',
+        items: generateCaseItems('Revolution', 35)
+    },
+    {
+        id: 'dreams',
+        name: 'Dreams & Nightmares Case',
+        price: 3.49,
+        image: '🌙',
+        description: 'Dreams and Nightmares',
+        items: generateCaseItems('Dreams', 40)
+    },
+    {
+        id: 'reckoning',
+        name: 'Recoil Case',
+        price: 1.79,
+        image: '🎯',
+        description: 'The Recoil Collection',
+        items: generateCaseItems('Recoil', 27)
+    }
+];
+
+/**
+ * Generate items for a case
+ * @param {string} collectionName - Name of the collection
+ * @param {number} itemCount - Number of items to generate
+ * @returns {Array} Array of generated items
+ */
+function generateCaseItems(collectionName, itemCount) {
+    const items = [];
+    
+    for (let i = 0; i < itemCount; i++) {
+        // Determine rarity based on probability distribution
+        const rarity = determineRarity();
+        const weapon = WEAPON_TYPES[Math.floor(Math.random() * WEAPON_TYPES.length)];
+        const skinName = SKIN_PREFIXES[Math.floor(Math.random() * SKIN_PREFIXES.length)];
+        
+        // Calculate base value based on rarity
+        let baseValue = Math.random() * 10 + 1;
+        baseValue *= RARITIES[rarity].multiplier;
+        
+        // Add some randomness to value
+        baseValue *= (0.8 + Math.random() * 0.4);
+        
+        items.push({
+            id: `${collectionName.toLowerCase()}-${i}`,
+            name: `${weapon} | ${skinName}`,
+            rarity: rarity.charAt(0) + rarity.slice(1).toLowerCase(),
+            image: getWeaponEmoji(weapon),
+            baseValue: parseFloat(baseValue.toFixed(2)),
+            collection: collectionName
+        });
+    }
+    
+    // Ensure at least one high-tier item exists in each case
+    if (!items.some(item => ['COVERT', 'GOLD'].includes(item.rarity.toUpperCase()))) {
+        const lastItem = items[items.length - 1];
+        lastItem.rarity = 'Covert';
+        lastItem.baseValue = Math.max(lastItem.baseValue, 100);
+    }
+    
+    return items;
+}
+
+/**
+ * Determine rarity based on probability weights
+ * @returns {string} Rarity name
+ */
+function determineRarity(customProbabilities = null) {
+    const probs = customProbabilities || {
+        CONSUMER: RARITIES.CONSUMER.probability,
+        INDUSTRIAL: RARITIES.INDUSTRIAL.probability,
+        MILSPEC: RARITIES.MILSPEC.probability,
+        RESTRICTED: RARITIES.RESTRICTED.probability,
+        CLASSIFIED: RARITIES.CLASSIFIED.probability,
+        COVERT: RARITIES.COVERT.probability,
+        GOLD: RARITIES.GOLD.probability
+    };
+    
+    const rand = Math.random();
+    let cumulative = 0;
+    
+    for (const [rarity, probability] of Object.entries(probs)) {
+        cumulative += probability;
+        if (rand <= cumulative) {
+            return rarity;
+        }
+    }
+    
+    return 'CONSUMER';
+}
+
+/**
+ * Get emoji representation for weapon type
+ * @param {string} weapon - Weapon name
+ * @returns {string} Emoji
+ */
+function getWeaponEmoji(weapon) {
+    if (weapon.includes('AK-47')) return '🔫';
+    if (weapon.includes('M4')) return '🎯';
+    if (weapon.includes('AWP')) return '🎪';
+    if (weapon.includes('Knife')) return '🔪';
+    if (weapon.includes('Gloves')) return '🧤';
+    if (weapon.includes('Pistol') || weapon.includes('USP') || weapon.includes('Glock') || weapon.includes('Desert')) return '🔫';
+    if (weapon.includes('SMG') || weapon.includes('MP') || weapon.includes('MAC')) return '💨';
+    if (weapon.includes('Shotgun')) return '💥';
+    if (weapon.includes('Rifle')) return '🎯';
+    return '📦';
+}
+
+/**
+ * Get wear condition from float value
+ * @param {number} float - Float value (0-1)
+ * @returns {string} Wear condition name
+ */
+function getWearCondition(float) {
+    for (const condition of WEAR_CONDITIONS) {
+        if (float >= condition.min && float < condition.max) {
+            return condition.name;
+        }
+    }
+    return 'Battle-Scarred';
+}
+
+/**
+ * Generate a random float value
+ * @returns {number} Float value between 0 and 1
+ */
+function generateFloat() {
+    return parseFloat((Math.random()).toFixed(6));
+}
+
+/**
+ * Generate pattern ID
+ * @returns {number} Pattern ID between 0 and 999
+ */
+function generatePatternId() {
+    return Math.floor(Math.random() * 1000);
+}
+
+/**
+ * Check if pattern is rare (e.g., Blue Gem style)
+ * @param {number} patternId - Pattern ID
+ * @returns {boolean} Whether pattern is rare
+ */
+function isRarePattern(patternId) {
+    // Top 5% patterns are considered rare
+    return patternId < 50 || patternId > 950;
+}
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        RARITIES,
+        WEAR_CONDITIONS,
+        CASES,
+        WEAPON_TYPES,
+        SKIN_PREFIXES,
+        determineRarity,
+        getWearCondition,
+        generateFloat,
+        generatePatternId,
+        isRarePattern,
+        getWeaponEmoji,
+        generateCaseItems
+    };
+}
+/**
+ * CS2 Case Opening Simulator - Utility Functions
+ * General purpose helper functions
+ */
+
+/**
+ * Format a number as currency
+ * @param {number} amount - Amount to format
+ * @returns {string} Formatted currency string
+ */
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(amount);
+}
+
+/**
+ * Format a date for display
+ * @param {Date|string} date - Date to format
+ * @returns {string} Formatted date string
+ */
+function formatDate(date) {
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+/**
+ * Generate a random string of specified length
+ * @param {number} length - Length of string
+ * @returns {string} Random string
+ */
+function generateRandomString(length = 32) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+/**
+ * Calculate SHA-256 hash of a string
+ * @param {string} message - String to hash
+ * @returns {Promise<string>} Hash as hex string
+ */
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Get CSS class name for rarity
+ * @param {string} rarity - Rarity name
+ * @returns {string} CSS class name
+ */
+function getRarityClass(rarity) {
+    const rarityLower = rarity.toLowerCase();
+    if (rarityLower.includes('consumer')) return 'rarity-consumer';
+    if (rarityLower.includes('industrial')) return 'rarity-industrial';
+    if (rarityLower.includes('milspec')) return 'rarity-milspec';
+    if (rarityLower.includes('restricted')) return 'rarity-restricted';
+    if (rarityLower.includes('classified')) return 'rarity-classified';
+    if (rarityLower.includes('covert')) return 'rarity-covert';
+    if (rarityLower.includes('gold')) return 'rarity-gold';
+    return 'rarity-consumer';
+}
+
+/**
+ * Get color for rarity
+ * @param {string} rarity - Rarity name
+ * @returns {string} Color hex code
+ */
+function getRarityColor(rarity) {
+    const rarityUpper = rarity.toUpperCase();
+    if (RARITIES[rarityUpper]) {
+        return RARITIES[rarityUpper].color;
+    }
+    return '#b0b0b0';
+}
+
+/**
+ * Clamp a value between min and max
+ * @param {number} value - Value to clamp
+ * @param {number} min - Minimum value
+ * @param {number} max - Maximum value
+ * @returns {number} Clamped value
+ */
+function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+
+/**
+ * Linear interpolation
+ * @param {number} start - Start value
+ * @param {number} end - End value
+ * @param {number} t - Interpolation factor (0-1)
+ * @returns {number} Interpolated value
+ */
+function lerp(start, end, t) {
+    return start + (end - start) * t;
+}
+
+/**
+ * Ease out cubic function for smooth animations
+ * @param {number} t - Time (0-1)
+ * @returns {number} Eased value
+ */
+function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+}
+
+/**
+ * Ease in out function for smooth animations
+ * @param {number} t - Time (0-1)
+ * @returns {number} Eased value
+ */
+function easeInOut(t) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
+/**
+ * Debounce function calls
+ * @param {Function} func - Function to debounce
+ * @param {number} wait - Wait time in ms
+ * @returns {Function} Debounced function
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+/**
+ * Throttle function calls
+ * @param {Function} func - Function to throttle
+ * @param {number} limit - Time limit in ms
+ * @returns {Function} Throttled function
+ */
+function throttle(func, limit) {
+    let inThrottle;
+    return function(...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+/**
+ * Save data to localStorage with error handling
+ * @param {string} key - Storage key
+ * @param {any} data - Data to store
+ * @returns {boolean} Success status
+ */
+function saveToStorage(key, data) {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+        return true;
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+        return false;
+    }
+}
+
+/**
+ * Load data from localStorage with error handling
+ * @param {string} key - Storage key
+ * @param {any} defaultValue - Default value if not found
+ * @returns {any} Loaded data or default value
+ */
+function loadFromStorage(key, defaultValue = null) {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+        console.error('Error loading from localStorage:', error);
+        return defaultValue;
+    }
+}
+
+/**
+ * Remove data from localStorage
+ * @param {string} key - Storage key
+ * @returns {boolean} Success status
+ */
+function removeFromStorage(key) {
+    try {
+        localStorage.removeItem(key);
+        return true;
+    } catch (error) {
+        console.error('Error removing from localStorage:', error);
+        return false;
+    }
+}
+
+/**
+ * Clear all localStorage
+ * @returns {boolean} Success status
+ */
+function clearStorage() {
+    try {
+        localStorage.clear();
+        return true;
+    } catch (error) {
+        console.error('Error clearing localStorage:', error);
+        return false;
+    }
+}
+
+/**
+ * Download data as JSON file
+ * @param {object} data - Data to export
+ * @param {string} filename - Filename for download
+ */
+function exportJSON(data, filename = 'export.json') {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+/**
+ * Read JSON file from input
+ * @param {File} file - File to read
+ * @returns {Promise<object>} Parsed JSON data
+ */
+function importJSON(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                resolve(data);
+            } catch (error) {
+                reject(new Error('Invalid JSON file'));
+            }
+        };
+        reader.onerror = () => reject(new Error('Error reading file'));
+        reader.readAsText(file);
+    });
+}
+
+/**
+ * Create particle effect
+ * @param {string} color - Particle color
+ * @param {number} count - Number of particles
+ */
+function createParticles(color = '#ffd700', count = 50) {
+    const container = document.createElement('div');
+    container.className = 'particle-container';
+    document.body.appendChild(container);
+    
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + 'vw';
+        particle.style.background = color;
+        particle.style.animationDelay = Math.random() * 2 + 's';
+        particle.style.width = (Math.random() * 10 + 5) + 'px';
+        particle.style.height = particle.style.width;
+        container.appendChild(particle);
+    }
+    
+    // Remove after animation
+    setTimeout(() => {
+        document.body.removeChild(container);
+    }, 5000);
+}
+
+/**
+ * Trigger screen shake effect
+ * @param {number} intensity - Shake intensity
+ * @param {number} duration - Duration in ms
+ */
+function screenShake(intensity = 10, duration = 500) {
+    document.body.style.animation = `shake ${duration}ms ease-in-out`;
+    document.body.style.transform = `translate(${intensity}px, ${intensity}px)`;
+    
+    setTimeout(() => {
+        document.body.style.animation = '';
+        document.body.style.transform = '';
+    }, duration);
+}
+
+// Add shake animation to stylesheet
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+        20%, 40%, 60%, 80% { transform: translateX(10px); }
+    }
+`;
+document.head.appendChild(shakeStyle);
+
+/**
+ * Show toast notification
+ * @param {string} message - Message to display
+ * @param {string} type - Notification type (success, error, info)
+ */
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        padding: 1rem 2rem;
+        background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
+        color: white;
+        border-radius: 5px;
+        z-index: 10001;
+        animation: slideInRight 0.3s ease;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => document.body.removeChild(toast), 300);
+    }, 3000);
+}
+
+// Add toast animations
+const toastStyle = document.createElement('style');
+toastStyle.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(toastStyle);
+
+/**
+ * Copy text to clipboard
+ * @param {string} text - Text to copy
+ * @returns {Promise<boolean>} Success status
+ */
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        return true;
+    } catch (error) {
+        console.error('Error copying to clipboard:', error);
+        return false;
+    }
+}
+
+// Export utilities
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        formatCurrency,
+        formatDate,
+        generateRandomString,
+        sha256,
+        getRarityClass,
+        getRarityColor,
+        clamp,
+        lerp,
+        easeOutCubic,
+        easeInOut,
+        debounce,
+        throttle,
+        saveToStorage,
+        loadFromStorage,
+        removeFromStorage,
+        clearStorage,
+        exportJSON,
+        importJSON,
+        createParticles,
+        screenShake,
+        showToast,
+        copyToClipboard
+    };
+}
+/**
+ * CS2 Case Opening Simulator - Provably Fair System
+ * Implements cryptographic fairness verification
+ */
+
+class ProvablyFairSystem {
+    constructor() {
+        this.serverSeed = null;
+        this.serverSeedHash = null;
+        this.clientSeed = 'default-client-seed';
+        this.nonce = 0;
+        this.rollHistory = [];
+        
+        this.initialize();
+    }
+    
+    /**
+     * Initialize the provably fair system
+     */
+    async initialize() {
+        // Load existing data or create new
+        const savedData = loadFromStorage('provablyFairData');
+        
+        if (savedData) {
+            this.serverSeed = savedData.serverSeed;
+            this.serverSeedHash = savedData.serverSeedHash;
+            this.clientSeed = savedData.clientSeed || 'default-client-seed';
+            this.nonce = savedData.nonce || 0;
+            this.rollHistory = savedData.rollHistory || [];
+        } else {
+            await this.generateServerSeed();
+        }
+        
+        this.updateUI();
+    }
+    
+    /**
+     * Generate a new server seed and its hash
+     */
+    async generateServerSeed() {
+        this.serverSeed = generateRandomString(64);
+        this.serverSeedHash = await sha256(this.serverSeed);
+        this.nonce = 0;
+        
+        this.save();
+        this.updateUI();
+        
+        return this.serverSeedHash;
+    }
+    
+    /**
+     * Set client seed
+     * @param {string} seed - Client seed
+     */
+    setClientSeed(seed) {
+        this.clientSeed = seed;
+        this.save();
+        this.updateUI();
+    }
+    
+    /**
+     * Generate a new random client seed
+     */
+    generateClientSeed() {
+        this.clientSeed = generateRandomString(32);
+        this.save();
+        this.updateUI();
+        return this.clientSeed;
+    }
+    
+    /**
+     * Get the next roll result using provably fair algorithm
+     * @param {number} max - Maximum value (exclusive)
+     * @returns {Promise<number>} Roll result
+     */
+    async getNextRoll(max = 1) {
+        if (!this.serverSeed) {
+            await this.generateServerSeed();
+        }
+        
+        // Create HMAC-like hash using concatenation
+        const message = `${this.serverSeed}:${this.clientSeed}:${this.nonce}`;
+        const hash = await sha256(message);
+        
+        // Convert first 8 hex chars to number
+        const hashInt = parseInt(hash.substring(0, 8), 16);
+        const result = hashInt % max;
+        
+        // Increment nonce for next roll
+        this.nonce++;
+        
+        // Save state
+        this.save();
+        this.updateUI();
+        
+        return result;
+    }
+    
+    /**
+     * Get roll result for specific parameters (for verification)
+     * @param {string} serverSeed - Server seed
+     * @param {string} clientSeed - Client seed
+     * @param {number} nonce - Nonce value
+     * @param {number} max - Maximum value
+     * @returns {Promise<number>} Roll result
+     */
+    static async getRollResult(serverSeed, clientSeed, nonce, max = 1) {
+        const message = `${serverSeed}:${clientSeed}:${nonce}`;
+        const hash = await sha256(message);
+        const hashInt = parseInt(hash.substring(0, 8), 16);
+        return hashInt % max;
+    }
+    
+    /**
+     * Verify a previous roll
+     * @param {string} serverSeed - Server seed to verify
+     * @param {string} clientSeed - Client seed used
+     * @param {number} nonce - Nonce value
+     * @param {number} expected - Expected result
+     * @returns {Promise<object>} Verification result
+     */
+    static async verifyRoll(serverSeed, clientSeed, nonce, expected) {
+        try {
+            // Verify server seed hash matches
+            const calculatedHash = await sha256(serverSeed);
+            
+            // Calculate expected roll
+            const message = `${serverSeed}:${clientSeed}:${nonce}`;
+            const hash = await sha256(message);
+            const hashInt = parseInt(hash.substring(0, 8), 16);
+            const result = hashInt % 1000000; // Using 1M as base for item selection
+            
+            const isValid = result === expected;
+            
+            return {
+                valid: isValid,
+                calculatedHash: calculatedHash,
+                calculatedResult: result,
+                message: isValid ? 'Roll verified successfully!' : 'Roll verification failed!'
+            };
+        } catch (error) {
+            return {
+                valid: false,
+                message: 'Verification error: ' + error.message
+            };
+        }
+    }
+    
+    /**
+     * Record a roll in history
+     * @param {object} rollData - Roll data to record
+     */
+    recordRoll(rollData) {
+        this.rollHistory.unshift({
+            ...rollData,
+            serverSeedHash: this.serverSeedHash,
+            clientSeed: this.clientSeed,
+            nonce: this.nonce - 1,
+            timestamp: Date.now()
+        });
+        
+        // Keep only last 100 rolls
+        if (this.rollHistory.length > 100) {
+            this.rollHistory = this.rollHistory.slice(0, 100);
+        }
+        
+        this.save();
+    }
+    
+    /**
+     * Reveal current server seed (starts new round)
+     * @returns {string} Revealed server seed
+     */
+    async revealServerSeed() {
+        const revealedSeed = this.serverSeed;
+        await this.generateServerSeed();
+        return revealedSeed;
+    }
+    
+    /**
+     * Save current state to localStorage
+     */
+    save() {
+        saveToStorage('provablyFairData', {
+            serverSeed: this.serverSeed,
+            serverSeedHash: this.serverSeedHash,
+            clientSeed: this.clientSeed,
+            nonce: this.nonce,
+            rollHistory: this.rollHistory
+        });
+    }
+    
+    /**
+     * Update UI elements with current values
+     */
+    updateUI() {
+        const hashElement = document.getElementById('serverSeedHash');
+        const clientSeedElement = document.getElementById('clientSeed');
+        const nonceElement = document.getElementById('currentNonce');
+        
+        if (hashElement) hashElement.value = this.serverSeedHash || '';
+        if (clientSeedElement) clientSeedElement.value = this.clientSeed;
+        if (nonceElement) nonceElement.value = this.nonce;
+        
+        this.updateRollHistoryUI();
+    }
+    
+    /**
+     * Update roll history display
+     */
+    updateRollHistoryUI() {
+        const historyList = document.getElementById('rollHistoryList');
+        if (!historyList) return;
+        
+        historyList.innerHTML = this.rollHistory.slice(0, 10).map(roll => `
+            <div class="roll-history-item" style="
+                padding: 0.5rem;
+                margin: 0.5rem 0;
+                background: var(--glass-bg);
+                border-radius: 5px;
+                border-left: 3px solid ${getRarityColor(roll.rarity)};
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>${roll.itemName}</span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem;">
+                        Nonce: ${roll.nonce}
+                    </span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                    ${formatDate(roll.timestamp)}
+                </div>
+            </div>
+        `).join('') || '<p style="color: var(--text-secondary);">No rolls yet</p>';
+    }
+    
+    /**
+     * Get roll history
+     * @returns {Array} Roll history array
+     */
+    getRollHistory() {
+        return this.rollHistory;
+    }
+    
+    /**
+     * Reset provably fair system
+     */
+    async reset() {
+        this.rollHistory = [];
+        await this.generateServerSeed();
+        this.save();
+        this.updateUI();
+    }
+}
+
+// Create global instance
+const provablyFair = new ProvablyFairSystem();
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { ProvablyFairSystem, provablyFair };
+}
+/**
+ * CS2 Case Opening Simulator - Audio System
+ * Handles all sound effects and audio controls
+ */
+
+class AudioManager {
+    constructor() {
+        this.audioContext = null;
+        this.masterVolume = 0.5;
+        this.muted = false;
+        this.sounds = {};
+        
+        this.initialize();
+    }
+    
+    /**
+     * Initialize audio system
+     */
+    async initialize() {
+        // Load settings
+        const savedVolume = loadFromStorage('audioVolume', 50);
+        const savedMuted = loadFromStorage('audioMuted', false);
+        
+        this.masterVolume = savedVolume / 100;
+        this.muted = savedMuted;
+        
+        // Initialize Web Audio API context
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (error) {
+            console.warn('Web Audio API not supported, using fallback sounds');
+        }
+        
+        this.updateUI();
+    }
+    
+    /**
+     * Set master volume
+     * @param {number} volume - Volume level (0-100)
+     */
+    setVolume(volume) {
+        this.masterVolume = clamp(volume / 100, 0, 1);
+        saveToStorage('audioVolume', volume);
+        this.updateUI();
+    }
+    
+    /**
+     * Toggle mute
+     * @param {boolean} muted - Mute state
+     */
+    setMuted(muted) {
+        this.muted = muted;
+        saveToStorage('audioMuted', muted);
+        this.updateUI();
+    }
+    
+    /**
+     * Update UI elements
+     */
+    updateUI() {
+        const volumeSlider = document.getElementById('masterVolume');
+        const volumeValue = document.getElementById('volumeValue');
+        const muteCheckbox = document.getElementById('muteAll');
+        
+        if (volumeSlider) volumeSlider.value = this.masterVolume * 100;
+        if (volumeValue) volumeValue.textContent = `${Math.round(this.masterVolume * 100)}%`;
+        if (muteCheckbox) muteCheckbox.checked = this.muted;
+    }
+    
+    /**
+     * Play a sound effect
+     * @param {string} type - Sound type
+     */
+    play(type) {
+        if (this.muted || !this.audioContext) return;
+        
+        switch (type) {
+            case 'caseOpen':
+                this.playCaseOpenSound();
+                break;
+            case 'spin':
+                this.playSpinSound();
+                break;
+            case 'land':
+                this.playLandSound();
+                break;
+            case 'rare':
+                this.playRareSound();
+                break;
+            case 'gold':
+                this.playGoldSound();
+                break;
+            case 'click':
+                this.playClickSound();
+                break;
+            case 'achievement':
+                this.playAchievementSound();
+                break;
+        }
+    }
+    
+    /**
+     * Play case opening sound
+     */
+    playCaseOpenSound() {
+        this.playSynthesizedSound({
+            frequency: 200,
+            duration: 0.3,
+            type: 'square',
+            volume: 0.3
+        });
+    }
+    
+    /**
+     * Play spinning sound
+     */
+    playSpinSound() {
+        this.playSynthesizedSound({
+            frequency: 150,
+            duration: 0.1,
+            type: 'triangle',
+            volume: 0.2
+        });
+    }
+    
+    /**
+     * Play item landing sound
+     */
+    playLandSound() {
+        this.playSynthesizedSound({
+            frequency: 300,
+            duration: 0.2,
+            type: 'sine',
+            volume: 0.4
+        });
+    }
+    
+    /**
+     * Play rare item reveal sound
+     */
+    playRareSound() {
+        this.playSynthesizedSound({
+            frequency: 600,
+            duration: 0.5,
+            type: 'sine',
+            volume: 0.5,
+            slide: true
+        });
+    }
+    
+    /**
+     * Play gold item special sound
+     */
+    playGoldSound() {
+        // Play a fanfare-like sequence
+        const now = this.audioContext.currentTime;
+        const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C major arpeggio
+        
+        frequencies.forEach((freq, index) => {
+            setTimeout(() => {
+                this.playSynthesizedSound({
+                    frequency: freq,
+                    duration: 0.4,
+                    type: 'triangle',
+                    volume: 0.4
+                });
+            }, index * 100);
+        });
+    }
+    
+    /**
+     * Play click sound
+     */
+    playClickSound() {
+        this.playSynthesizedSound({
+            frequency: 800,
+            duration: 0.05,
+            type: 'sine',
+            volume: 0.15
+        });
+    }
+    
+    /**
+     * Play achievement unlock sound
+     */
+    playAchievementSound() {
+        const now = this.audioContext.currentTime;
+        const frequencies = [440, 554, 659, 880]; // A major
+        
+        frequencies.forEach((freq, index) => {
+            setTimeout(() => {
+                this.playSynthesizedSound({
+                    frequency: freq,
+                    duration: 0.3,
+                    type: 'sine',
+                    volume: 0.3
+                });
+            }, index * 80);
+        });
+    }
+    
+    /**
+     * Play synthesized sound using Web Audio API
+     * @param {object} params - Sound parameters
+     */
+    playSynthesizedSound(params) {
+        if (!this.audioContext) return;
+        
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        oscillator.type = params.type || 'sine';
+        oscillator.frequency.setValueAtTime(params.frequency, this.audioContext.currentTime);
+        
+        if (params.slide) {
+            oscillator.frequency.exponentialRampToValueAtTime(
+                params.frequency * 1.5,
+                this.audioContext.currentTime + params.duration
+            );
+        }
+        
+        gainNode.gain.setValueAtTime(params.volume * this.masterVolume, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + params.duration);
+        
+        oscillator.start(this.audioContext.currentTime);
+        oscillator.stop(this.audioContext.currentTime + params.duration);
+    }
+    
+    /**
+     * Resume audio context (needed for some browsers)
+     */
+    resume() {
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+    }
+}
+
+// Create global instance
+const audioManager = new AudioManager();
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { AudioManager, audioManager };
+}
+/**
+ * CS2 Case Opening Simulator - Spinner Animation System
+ * Handles the case opening reel animation with realistic physics
+ */
+
+class SpinnerAnimation {
+    constructor() {
+        this.reel = null;
+        this.isSpinning = false;
+        this.animationId = null;
+        this.items = [];
+        this.itemWidth = 150;
+        this.currentIndex = 0;
+        this.targetIndex = 0;
+        this.position = 0;
+        this.velocity = 0;
+        this.acceleration = 0;
+        this.deceleration = 0.98;
+        this.minVelocity = 0.1;
+        
+        // Animation timing
+        this.startTime = 0;
+        this.duration = 6000; // 6 seconds default
+        this.fastModeDuration = 2000;
+    }
+    
+    /**
+     * Initialize spinner with case items
+     * @param {Array} caseItems - Items from the case
+     * @param {HTMLElement} reelElement - Reel DOM element
+     */
+    initialize(caseItems, reelElement) {
+        this.reel = reelElement;
+        this.items = this.generateReelItems(caseItems);
+        this.renderReel();
+    }
+    
+    /**
+     * Generate reel items with weighted probabilities
+     * @param {Array} caseItems - Original case items
+     * @returns {Array} Generated reel items
+     */
+    generateReelItems(caseItems) {
+        const reelItems = [];
+        const totalItems = 100; // Generate 100 items for the reel
+        
+        // Create weighted pool based on rarities
+        for (let i = 0; i < totalItems; i++) {
+            const selectedItem = this.selectWeightedItem(caseItems);
+            reelItems.push({
+                ...selectedItem,
+                float: generateFloat(),
+                patternId: generatePatternId(),
+                wearCondition: getWearCondition(generateFloat())
+            });
+        }
+        
+        return reelItems;
+    }
+    
+    /**
+     * Select item based on rarity weights
+     * @param {Array} caseItems - Available items
+     * @returns {object} Selected item
+     */
+    selectWeightedItem(caseItems) {
+        // Determine rarity first
+        const rarityKey = determineRarity();
+        const rarityData = RARITIES[rarityKey];
+        
+        // Filter items by rarity
+        const rarityItems = caseItems.filter(item => 
+            item.rarity.toLowerCase() === rarityKey.toLowerCase()
+        );
+        
+        // If no items of that rarity, use any item
+        const availableItems = rarityItems.length > 0 ? rarityItems : caseItems;
+        
+        // Select random item from available
+        return availableItems[Math.floor(Math.random() * availableItems.length)];
+    }
+    
+    /**
+     * Render the reel with items
+     */
+    renderReel() {
+        if (!this.reel) return;
+        
+        this.reel.innerHTML = this.items.map((item, index) => `
+            <div class="spinner-item" data-index="${index}">
+                <div class="spinner-item-image" style="border-bottom: 3px solid ${getRarityColor(item.rarity)}">
+                    ${item.image}
+                </div>
+                <div class="spinner-item-name">${item.name}</div>
+                <div class="rarity-bar" style="background: ${getRarityColor(item.rarity)}"></div>
+            </div>
+        `).join('');
+    }
+    
+    /**
+     * Start spinning animation
+     * @param {number} targetIndex - Index where reel should stop
+     * @param {boolean} fastMode - Use fast mode
+     * @returns {Promise<object>} Result item
+     */
+    async spin(targetIndex, fastMode = false) {
+        return new Promise((resolve) => {
+            if (this.isSpinning) return;
+            
+            this.isSpinning = true;
+            this.targetIndex = targetIndex;
+            this.startTime = performance.now();
+            this.duration = fastMode ? this.fastModeDuration : this.duration;
+            
+            // Calculate total distance to travel
+            // Add some randomness to landing position within the item
+            const itemOffset = Math.floor(Math.random() * 100) - 50; // ±50px within item
+            const totalDistance = (this.targetIndex * this.itemWidth) + (this.itemWidth / 2) + itemOffset;
+            
+            // Initial velocity calculation for smooth acceleration/deceleration
+            const maxVelocity = totalDistance / (this.duration / 2);
+            this.velocity = 0;
+            this.position = 0;
+            
+            // Play initial sound
+            audioManager.play('caseOpen');
+            
+            const animate = (currentTime) => {
+                const elapsed = currentTime - this.startTime;
+                const progress = Math.min(elapsed / this.duration, 1);
+                
+                // Ease out cubic for natural deceleration
+                const easedProgress = easeOutCubic(progress);
+                
+                // Calculate current position
+                this.position = totalDistance * easedProgress;
+                
+                // Update reel position
+                this.reel.style.transform = `translateX(-${this.position}px)`;
+                
+                // Play tick sounds as items pass center
+                const currentItemIndex = Math.floor(this.position / this.itemWidth);
+                if (currentItemIndex > this.currentIndex && currentItemIndex <= this.targetIndex) {
+                    if (currentItemIndex % 5 === 0) { // Play sound every 5 items for performance
+                        audioManager.play('spin');
+                    }
+                    this.currentIndex = currentItemIndex;
+                }
+                
+                // Continue animation or finish
+                if (progress < 1) {
+                    this.animationId = requestAnimationFrame(animate);
+                } else {
+                    this.finishSpin(resolve);
+                }
+            };
+            
+            this.animationId = requestAnimationFrame(animate);
+        });
+    }
+    
+    /**
+     * Finish spinning and show result
+     * @param {Function} resolve - Promise resolve function
+     */
+    finishSpin(resolve) {
+        this.isSpinning = false;
+        this.currentIndex = 0;
+        
+        // Play landing sound
+        audioManager.play('land');
+        
+        // Get result item
+        const resultItem = this.items[this.targetIndex];
+        
+        // Check for rare/gold items
+        if (resultItem.rarity.toUpperCase() === 'GOLD') {
+            audioManager.play('gold');
+            createParticles('#ffd700', 100);
+            screenShake(15, 1000);
+        } else if (['COVERT', 'CLASSIFIED'].includes(resultItem.rarity.toUpperCase())) {
+            audioManager.play('rare');
+            createParticles(getRarityColor(resultItem.rarity), 30);
+        }
+        
+        // Return result after brief delay
+        setTimeout(() => {
+            resolve(resultItem);
+        }, 500);
+    }
+    
+    /**
+     * Stop animation immediately
+     */
+    stop() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+        this.isSpinning = false;
+    }
+    
+    /**
+     * Reset spinner to initial state
+     */
+    reset() {
+        this.stop();
+        this.position = 0;
+        this.currentIndex = 0;
+        if (this.reel) {
+            this.reel.style.transform = 'translateX(0)';
+        }
+    }
+    
+    /**
+     * Get item at specific index
+     * @param {number} index - Item index
+     * @returns {object} Item data
+     */
+    getItemAt(index) {
+        return this.items[index] || null;
+    }
+    
+    /**
+     * Set animation duration
+     * @param {number} duration - Duration in milliseconds
+     */
+    setDuration(duration) {
+        this.duration = duration;
+    }
+}
+
+// Create global instance
+const spinner = new SpinnerAnimation();
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { SpinnerAnimation, spinner };
+}
+/**
+ * CS2 Case Opening Simulator - Inventory System
+ * Manages user inventory with localStorage persistence
+ */
+
+class InventoryManager {
+    constructor() {
+        this.items = [];
+        this.selectedItems = new Set();
+        this.currentPage = 1;
+        this.itemsPerPage = 20;
+        this.sortBy = 'date-desc';
+        this.searchQuery = '';
+        
+        this.initialize();
+    }
+    
+    /**
+     * Initialize inventory from storage
+     */
+    initialize() {
+        const savedInventory = loadFromStorage('inventory', []);
+        this.items = savedInventory;
+        this.render();
+    }
+    
+    /**
+     * Add item to inventory
+     * @param {object} item - Item to add
+     * @returns {object} Added item with metadata
+     */
+    addItem(item) {
+        const newItem = {
+            ...item,
+            id: `${item.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            float: generateFloat(),
+            patternId: generatePatternId(),
+            dateObtained: Date.now(),
+            caseSource: item.collection || 'Unknown'
+        };
+        
+        // Calculate final value based on float and pattern
+        newItem.finalValue = this.calculateItemValue(newItem);
+        
+        this.items.unshift(newItem);
+        this.save();
+        this.render();
+        
+        return newItem;
+    }
+    
+    /**
+     * Calculate item value based on float and pattern
+     * @param {object} item - Item data
+     * @returns {number} Calculated value
+     */
+    calculateItemValue(item) {
+        let value = item.baseValue;
+        
+        // Float multiplier (lower is better for most skins)
+        if (item.float < 0.07) {
+            value *= 1.5; // Factory New bonus
+        } else if (item.float < 0.15) {
+            value *= 1.2; // Minimal Wear bonus
+        } else if (item.float > 0.45) {
+            value *= 0.8; // Battle Scarred penalty
+        }
+        
+        // Rare pattern bonus
+        if (isRarePattern(item.patternId)) {
+            value *= 2;
+        }
+        
+        // Special pattern bonuses (Blue Gem style)
+        if (item.patternId < 10) {
+            value *= 5;
+        }
+        
+        return parseFloat(value.toFixed(2));
+    }
+    
+    /**
+     * Remove item from inventory
+     * @param {string} itemId - Item ID to remove
+     * @returns {boolean} Success status
+     */
+    removeItem(itemId) {
+        const index = this.items.findIndex(item => item.id === itemId);
+        if (index !== -1) {
+            this.items.splice(index, 1);
+            this.selectedItems.delete(itemId);
+            this.save();
+            this.render();
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Sell item
+     * @param {string} itemId - Item ID to sell
+     * @returns {number} Sale price
+     */
+    sellItem(itemId) {
+        const item = this.items.find(i => i.id === itemId);
+        if (!item) return 0;
+        
+        const salePrice = item.finalValue;
+        this.removeItem(itemId);
+        
+        return salePrice;
+    }
+    
+    /**
+     * Sell multiple items
+     * @param {Array} itemIds - Array of item IDs
+     * @returns {number} Total sale price
+     */
+    sellItems(itemIds) {
+        let total = 0;
+        itemIds.forEach(id => {
+            total += this.sellItem(id);
+        });
+        return total;
+    }
+    
+    /**
+     * Sell all items
+     * @returns {number} Total sale price
+     */
+    sellAll() {
+        const total = this.getTotalValue();
+        this.items = [];
+        this.selectedItems.clear();
+        this.save();
+        this.render();
+        return total;
+    }
+    
+    /**
+     * Toggle item selection
+     * @param {string} itemId - Item ID to toggle
+     */
+    toggleSelection(itemId) {
+        if (this.selectedItems.has(itemId)) {
+            this.selectedItems.delete(itemId);
+        } else {
+            this.selectedItems.add(itemId);
+        }
+        this.render();
+    }
+    
+    /**
+     * Clear selection
+     */
+    clearSelection() {
+        this.selectedItems.clear();
+        this.render();
+    }
+    
+    /**
+     * Get filtered and sorted items
+     * @returns {Array} Filtered items
+     */
+    getFilteredItems() {
+        let filtered = [...this.items];
+        
+        // Apply search filter
+        if (this.searchQuery) {
+            const query = this.searchQuery.toLowerCase();
+            filtered = filtered.filter(item => 
+                item.name.toLowerCase().includes(query) ||
+                item.rarity.toLowerCase().includes(query) ||
+                item.caseSource.toLowerCase().includes(query)
+            );
+        }
+        
+        // Apply sorting
+        filtered.sort((a, b) => {
+            switch (this.sortBy) {
+                case 'date-desc':
+                    return b.dateObtained - a.dateObtained;
+                case 'date-asc':
+                    return a.dateObtained - b.dateObtained;
+                case 'value-desc':
+                    return b.finalValue - a.finalValue;
+                case 'value-asc':
+                    return a.finalValue - b.finalValue;
+                case 'rarity-desc':
+                    return this.getRarityScore(b.rarity) - this.getRarityScore(a.rarity);
+                default:
+                    return 0;
+            }
+        });
+        
+        return filtered;
+    }
+    
+    /**
+     * Get rarity score for sorting
+     * @param {string} rarity - Rarity name
+     * @returns {number} Rarity score
+     */
+    getRarityScore(rarity) {
+        const scores = {
+            'Consumer': 1,
+            'Industrial': 2,
+            'Mil-Spec': 3,
+            'Restricted': 4,
+            'Classified': 5,
+            'Covert': 6,
+            'Gold': 7
+        };
+        return scores[rarity] || 0;
+    }
+    
+    /**
+     * Get paginated items
+     * @returns {Array} Items for current page
+     */
+    getPaginatedItems() {
+        const filtered = this.getFilteredItems();
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        return filtered.slice(start, end);
+    }
+    
+    /**
+     * Get total pages
+     * @returns {number} Total pages
+     */
+    getTotalPages() {
+        return Math.ceil(this.getFilteredItems().length / this.itemsPerPage);
+    }
+    
+    /**
+     * Get total inventory value
+     * @returns {number} Total value
+     */
+    getTotalValue() {
+        return this.items.reduce((sum, item) => sum + item.finalValue, 0);
+    }
+    
+    /**
+     * Get item count by rarity
+     * @returns {object} Counts by rarity
+     */
+    getCountByRarity() {
+        const counts = {};
+        this.items.forEach(item => {
+            counts[item.rarity] = (counts[item.rarity] || 0) + 1;
+        });
+        return counts;
+    }
+    
+    /**
+     * Save inventory to storage
+     */
+    save() {
+        saveToStorage('inventory', this.items);
+    }
+    
+    /**
+     * Render inventory grid
+     */
+    render() {
+        const grid = document.getElementById('inventoryGrid');
+        if (!grid) return;
+        
+        const items = this.getPaginatedItems();
+        
+        if (items.length === 0) {
+            grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 2rem;">No items in inventory. Open some cases!</p>';
+        } else {
+            grid.innerHTML = items.map(item => `
+                <div class="item-card ${this.selectedItems.has(item.id) ? 'selected' : ''} ${getRarityClass(item.rarity)}" 
+                     data-id="${item.id}"
+                     onclick="inventory.toggleSelection('${item.id}')">
+                    <div class="item-card-image" style="border-bottom: 3px solid ${getRarityColor(item.rarity)}">
+                        ${item.image}
+                    </div>
+                    <div class="item-card-name" title="${item.name}">${item.name}</div>
+                    <div class="item-card-value">${formatCurrency(item.finalValue)}</div>
+                    <div class="item-card-float">Float: ${item.float.toFixed(6)}</div>
+                    <div class="item-card-float">${item.wearCondition || getWearCondition(item.float)}</div>
+                </div>
+            `).join('');
+        }
+        
+        this.renderPagination();
+    }
+    
+    /**
+     * Render pagination controls
+     */
+    renderPagination() {
+        const pagination = document.getElementById('inventoryPagination');
+        if (!pagination) return;
+        
+        const totalPages = this.getTotalPages();
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+        
+        let html = '';
+        
+        // Previous button
+        html += `<button class="btn-page" ${this.currentPage === 1 ? 'disabled' : ''} onclick="inventory.setPage(${this.currentPage - 1})">«</button>`;
+        
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= this.currentPage - 2 && i <= this.currentPage + 2)) {
+                html += `<button class="btn-page ${i === this.currentPage ? 'active' : ''}" onclick="inventory.setPage(${i})">${i}</button>`;
+            } else if (i === this.currentPage - 3 || i === this.currentPage + 3) {
+                html += '<span style="padding: 0.5rem;">...</span>';
+            }
+        }
+        
+        // Next button
+        html += `<button class="btn-page" ${this.currentPage === totalPages ? 'disabled' : ''} onclick="inventory.setPage(${this.currentPage + 1})">»</button>`;
+        
+        pagination.innerHTML = html;
+    }
+    
+    /**
+     * Set current page
+     * @param {number} page - Page number
+     */
+    setPage(page) {
+        const totalPages = this.getTotalPages();
+        this.currentPage = clamp(page, 1, totalPages);
+        this.render();
+    }
+    
+    /**
+     * Set sort order
+     * @param {string} sortBy - Sort field
+     */
+    setSort(sortBy) {
+        this.sortBy = sortBy;
+        this.currentPage = 1;
+        this.render();
+    }
+    
+    /**
+     * Set search query
+     * @param {string} query - Search query
+     */
+    setSearch(query) {
+        this.searchQuery = query;
+        this.currentPage = 1;
+        this.render();
+    }
+    
+    /**
+     * Export inventory to JSON
+     */
+    export() {
+        exportJSON({
+            version: '1.0',
+            exportDate: Date.now(),
+            items: this.items
+        }, 'cs2-inventory-export.json');
+    }
+    
+    /**
+     * Import inventory from JSON
+     * @param {File} file - JSON file
+     */
+    async import(file) {
+        try {
+            const data = await importJSON(file);
+            if (data.items && Array.isArray(data.items)) {
+                this.items = [...data.items, ...this.items];
+                this.save();
+                this.render();
+                showToast(`Imported ${data.items.length} items successfully!`, 'success');
+            } else {
+                throw new Error('Invalid inventory format');
+            }
+        } catch (error) {
+            showToast('Error importing inventory: ' + error.message, 'error');
+        }
+    }
+    
+    /**
+     * Clear all items
+     */
+    clear() {
+        this.items = [];
+        this.selectedItems.clear();
+        this.save();
+        this.render();
+    }
+    
+    /**
+     * Get item by ID
+     * @param {string} itemId - Item ID
+     * @returns {object|null} Item data
+     */
+    getItem(itemId) {
+        return this.items.find(item => item.id === itemId) || null;
+    }
+}
+
+// Create global instance
+const inventory = new InventoryManager();
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { InventoryManager, inventory };
+}
+/**
+ * CS2 Case Opening Simulator - Statistics System
+ * Tracks and displays user statistics with charts
+ */
+
+class StatisticsManager {
+    constructor() {
+        this.stats = {
+            casesOpened: 0,
+            totalSpent: 0,
+            totalEarned: 0,
+            itemsObtained: 0,
+            bestDrop: null,
+            worstDrop: null,
+            rarityCounts: {
+                Consumer: 0,
+                Industrial: 0,
+                MilSpec: 0,
+                Restricted: 0,
+                Classified: 0,
+                Covert: 0,
+                Gold: 0
+            }
+        };
+        
+        this.rarityChart = null;
+        this.valueChart = null;
+        
+        this.initialize();
+    }
+    
+    /**
+     * Initialize statistics from storage
+     */
+    initialize() {
+        const savedStats = loadFromStorage('statistics', null);
+        if (savedStats) {
+            this.stats = { ...this.stats, ...savedStats };
+        }
+        this.updateUI();
+    }
+    
+    /**
+     * Record a case opening
+     * @param {number} price - Case price
+     */
+    recordCaseOpening(price) {
+        this.stats.casesOpened++;
+        this.stats.totalSpent += price;
+        this.save();
+        this.updateUI();
+    }
+    
+    /**
+     * Record an item drop
+     * @param {object} item - Dropped item
+     */
+    recordItemDrop(item) {
+        this.stats.itemsObtained++;
+        this.stats.totalEarned += item.finalValue || item.baseValue;
+        
+        // Update rarity count
+        const rarityKey = item.rarity.replace('-', '');
+        if (this.stats.rarityCounts[rarityKey] !== undefined) {
+            this.stats.rarityCounts[rarityKey]++;
+        }
+        
+        // Track best/worst drops
+        const value = item.finalValue || item.baseValue;
+        if (!this.stats.bestDrop || value > this.stats.bestDrop.value) {
+            this.stats.bestDrop = {
+                name: item.name,
+                value: value,
+                rarity: item.rarity,
+                date: Date.now()
+            };
+        }
+        
+        if (!this.stats.worstDrop || value < this.stats.worstDrop.value) {
+            this.stats.worstDrop = {
+                name: item.name,
+                value: value,
+                rarity: item.rarity,
+                date: Date.now()
+            };
+        }
+        
+        this.save();
+        this.updateUI();
+        this.updateCharts();
+    }
+    
+    /**
+     * Calculate ROI percentage
+     * @returns {number} ROI percentage
+     */
+    getROI() {
+        if (this.stats.totalSpent === 0) return 0;
+        return ((this.stats.totalEarned - this.stats.totalSpent) / this.stats.totalSpent) * 100;
+    }
+    
+    /**
+     * Get average item value
+     * @returns {number} Average value
+     */
+    getAverageValue() {
+        if (this.stats.itemsObtained === 0) return 0;
+        return this.stats.totalEarned / this.stats.itemsObtained;
+    }
+    
+    /**
+     * Save statistics to storage
+     */
+    save() {
+        saveToStorage('statistics', this.stats);
+    }
+    
+    /**
+     * Update UI elements
+     */
+    updateUI() {
+        // Home page stats
+        const homeCases = document.getElementById('totalCasesOpened');
+        const homeProfit = document.getElementById('totalProfit');
+        const homeBest = document.getElementById('bestDrop');
+        
+        if (homeCases) homeCases.textContent = this.stats.casesOpened.toLocaleString();
+        if (homeProfit) homeProfit.textContent = formatCurrency(this.stats.totalEarned - this.stats.totalSpent);
+        if (homeBest) homeBest.textContent = this.stats.bestDrop ? `${this.stats.bestDrop.name} (${formatCurrency(this.stats.bestDrop.value)})` : 'N/A';
+        
+        // Statistics page
+        const statCases = document.getElementById('statCasesOpened');
+        const statSpent = document.getElementById('statTotalSpent');
+        const statEarned = document.getElementById('statTotalEarned');
+        const statROI = document.getElementById('statROI');
+        const statAvg = document.getElementById('statAvgValue');
+        const statInvValue = document.getElementById('statInventoryValue');
+        
+        if (statCases) statCases.textContent = this.stats.casesOpened.toLocaleString();
+        if (statSpent) statSpent.textContent = formatCurrency(this.stats.totalSpent);
+        if (statEarned) statEarned.textContent = formatCurrency(this.stats.totalEarned);
+        if (statROI) {
+            const roi = this.getROI();
+            statROI.textContent = `${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%`;
+            statROI.style.color = roi >= 0 ? '#4caf50' : '#f44336';
+        }
+        if (statAvg) statAvg.textContent = formatCurrency(this.getAverageValue());
+        if (statInvValue) statInvValue.textContent = formatCurrency(inventory.getTotalValue());
+    }
+    
+    /**
+     * Initialize and update charts
+     */
+    updateCharts() {
+        this.initRarityChart();
+        this.initValueChart();
+    }
+    
+    /**
+     * Initialize rarity distribution chart
+     */
+    initRarityChart() {
+        const ctx = document.getElementById('rarityChart');
+        if (!ctx) return;
+        
+        const data = this.stats.rarityCounts;
+        
+        if (this.rarityChart) {
+            this.rarityChart.destroy();
+        }
+        
+        this.rarityChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    data: Object.values(data),
+                    backgroundColor: [
+                        '#b0b0b0',  // Consumer
+                        '#4b69ff',  // Industrial
+                        '#4b69ff',  // Mil-Spec
+                        '#8847ff',  // Restricted
+                        '#d32ce6',  // Classified
+                        '#eb4b4b',  // Covert
+                        '#ffd700'   // Gold
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#ffffff',
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * Initialize value distribution chart
+     */
+    initValueChart() {
+        const ctx = document.getElementById('valueChart');
+        if (!ctx) return;
+        
+        if (this.valueChart) {
+            this.valueChart.destroy();
+        }
+        
+        // Group items by value ranges
+        const inventoryItems = inventory.items;
+        const ranges = {
+            '$0-10': 0,
+            '$10-50': 0,
+            '$50-100': 0,
+            '$100-500': 0,
+            '$500+': 0
+        };
+        
+        inventoryItems.forEach(item => {
+            const value = item.finalValue || 0;
+            if (value < 10) ranges['$0-10']++;
+            else if (value < 50) ranges['$10-50']++;
+            else if (value < 100) ranges['$50-100']++;
+            else if (value < 500) ranges['$100-500']++;
+            else ranges['$500+']++;
+        });
+        
+        this.valueChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(ranges),
+                datasets: [{
+                    label: 'Items',
+                    data: Object.values(ranges),
+                    backgroundColor: 'rgba(255, 107, 53, 0.8)',
+                    borderColor: 'rgba(255, 107, 53, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#ffffff' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    x: {
+                        ticks: { color: '#ffffff' },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * Reset all statistics
+     */
+    reset() {
+        this.stats = {
+            casesOpened: 0,
+            totalSpent: 0,
+            totalEarned: 0,
+            itemsObtained: 0,
+            bestDrop: null,
+            worstDrop: null,
+            rarityCounts: {
+                Consumer: 0,
+                Industrial: 0,
+                MilSpec: 0,
+                Restricted: 0,
+                Classified: 0,
+                Covert: 0,
+                Gold: 0
+            }
+        };
+        this.save();
+        this.updateUI();
+        this.updateCharts();
+    }
+    
+    /**
+     * Get statistics data
+     * @returns {object} Statistics data
+     */
+    getData() {
+        return { ...this.stats };
+    }
+}
+
+// Create global instance
+const statistics = new StatisticsManager();
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { StatisticsManager, statistics };
+}
+/**
+ * CS2 Case Opening Simulator - Achievements System
+ * Tracks and displays user achievements
+ */
+
+class AchievementsManager {
+    constructor() {
+        this.achievements = [
+            {
+                id: 'first_case',
+                title: 'First Steps',
+                description: 'Open your first case',
+                icon: '🎁',
+                unlocked: false,
+                condition: () => statistics.stats.casesOpened >= 1
+            },
+            {
+                id: 'hundred_cases',
+                title: 'Century',
+                description: 'Open 100 cases',
+                icon: '💯',
+                unlocked: false,
+                condition: () => statistics.stats.casesOpened >= 100
+            },
+            {
+                id: 'five_hundred_cases',
+                title: 'Dedicated',
+                description: 'Open 500 cases',
+                icon: '🔥',
+                unlocked: false,
+                condition: () => statistics.stats.casesOpened >= 500
+            },
+            {
+                id: 'thousand_cases',
+                title: 'Legend',
+                description: 'Open 1000 cases',
+                icon: '👑',
+                unlocked: false,
+                condition: () => statistics.stats.casesOpened >= 1000
+            },
+            {
+                id: 'first_covert',
+                title: 'Red Alert',
+                description: 'Get your first Covert item',
+                icon: '🔴',
+                unlocked: false,
+                condition: () => statistics.stats.rarityCounts.Covert >= 1
+            },
+            {
+                id: 'first_gold',
+                title: 'Golden Touch',
+                description: 'Get your first Gold item',
+                icon: '⭐',
+                unlocked: false,
+                condition: () => statistics.stats.rarityCounts.Gold >= 1
+            },
+            {
+                id: 'profit_1000',
+                title: 'Profitable',
+                description: 'Achieve $1,000 in profit',
+                icon: '💰',
+                unlocked: false,
+                condition: () => (statistics.stats.totalEarned - statistics.stats.totalSpent) >= 1000
+            },
+            {
+                id: 'inventory_value',
+                title: 'Collector',
+                description: 'Have $1,000 worth of inventory',
+                icon: '📦',
+                unlocked: false,
+                condition: () => inventory.getTotalValue() >= 1000
+            },
+            {
+                id: 'lucky_streak',
+                title: 'Lucky Streak',
+                description: 'Get 3 rare items in a row',
+                icon: '🍀',
+                unlocked: false,
+                condition: () => false // Special tracking needed
+            },
+            {
+                id: 'millionaire',
+                title: 'Millionaire',
+                description: 'Have $1,000,000 wallet balance',
+                icon: '💎',
+                unlocked: false,
+                condition: () => app.wallet >= 1000000
+            }
+        ];
+        
+        this.initialize();
+    }
+    
+    /**
+     * Initialize achievements from storage
+     */
+    initialize() {
+        const savedAchievements = loadFromStorage('achievements', []);
+        
+        if (savedAchievements.length > 0) {
+            // Merge saved state with achievement definitions
+            savedAchievements.forEach(saved => {
+                const achievement = this.achievements.find(a => a.id === saved.id);
+                if (achievement) {
+                    achievement.unlocked = saved.unlocked;
+                }
+            });
+        }
+        
+        this.checkAll();
+        this.render();
+    }
+    
+    /**
+     * Check all achievements
+     */
+    checkAll() {
+        let newUnlocks = [];
+        
+        this.achievements.forEach(achievement => {
+            if (!achievement.unlocked && achievement.condition()) {
+                achievement.unlocked = true;
+                newUnlocks.push(achievement);
+            }
+        });
+        
+        if (newUnlocks.length > 0) {
+            this.save();
+            this.render();
+            newUnlocks.forEach(a => this.showNotification(a));
+        }
+    }
+    
+    /**
+     * Show achievement notification
+     * @param {object} achievement - Unlocked achievement
+     */
+    showNotification(achievement) {
+        const notification = document.getElementById('achievementNotification');
+        const title = document.getElementById('achievementTitle');
+        const description = document.getElementById('achievementDescription');
+        
+        if (notification && title && description) {
+            title.textContent = `🏆 ${achievement.title}`;
+            description.textContent = achievement.description;
+            notification.classList.add('show');
+            
+            audioManager.play('achievement');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+    }
+    
+    /**
+     * Save achievements to storage
+     */
+    save() {
+        const data = this.achievements.map(a => ({
+            id: a.id,
+            unlocked: a.unlocked
+        }));
+        saveToStorage('achievements', data);
+    }
+    
+    /**
+     * Render achievements grid
+     */
+    render() {
+        const grid = document.getElementById('achievementsGrid');
+        if (!grid) return;
+        
+        grid.innerHTML = this.achievements.map(achievement => `
+            <div class="achievement-card ${achievement.unlocked ? 'unlocked' : 'locked'}">
+                <div class="achievement-icon">${achievement.icon}</div>
+                <div class="achievement-info">
+                    <h4>${achievement.title}</h4>
+                    <p>${achievement.description}</p>
+                    <p style="font-size: 0.8rem; margin-top: 0.5rem; color: ${achievement.unlocked ? '#ffd700' : 'var(--text-secondary)'}">
+                        ${achievement.unlocked ? '✓ Unlocked' : '🔒 Locked'}
+                    </p>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    /**
+     * Get achievement by ID
+     * @param {string} id - Achievement ID
+     * @returns {object|null} Achievement data
+     */
+    getAchievement(id) {
+        return this.achievements.find(a => a.id === id) || null;
+    }
+    
+    /**
+     * Get unlocked count
+     * @returns {number} Number of unlocked achievements
+     */
+    getUnlockedCount() {
+        return this.achievements.filter(a => a.unlocked).length;
+    }
+    
+    /**
+     * Get total count
+     * @returns {number} Total achievements
+     */
+    getTotalCount() {
+        return this.achievements.length;
+    }
+    
+    /**
+     * Reset all achievements
+     */
+    reset() {
+        this.achievements.forEach(a => a.unlocked = false);
+        this.save();
+        this.render();
+    }
+}
+
+// Create global instance
+const achievements = new AchievementsManager();
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { AchievementsManager, achievements };
+}
+/**
+ * CS2 Case Opening Simulator - UI Manager
+ * Handles all UI interactions and navigation
+ */
+
+class UIManager {
+    constructor() {
+        this.currentPage = 'home';
+        this.selectedCase = null;
+        
+        this.initialize();
+    }
+    
+    /**
+     * Initialize UI components
+     */
+    initialize() {
+        this.setupNavigation();
+        this.setupCasesPage();
+        this.setupOpenCasePage();
+        this.setupInventoryPage();
+        this.setupSettingsPage();
+        this.setupVerificationPage();
+        this.setupModals();
+        this.renderCases();
+    }
+    
+    /**
+     * Setup navigation
+     */
+    setupNavigation() {
+        const navLinks = document.querySelectorAll('.nav-links a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                audioManager.play('click');
+                const page = link.dataset.page;
+                this.navigateTo(page);
+            });
+        });
+        
+        // Handle direct hash navigation
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.slice(1);
+            if (hash && document.getElementById(hash)) {
+                this.navigateTo(hash);
+            }
+        });
+    }
+    
+    /**
+     * Navigate to page
+     * @param {string} pageId - Page ID
+     */
+    navigateTo(pageId) {
+        // Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+        
+        // Show target page
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) {
+            targetPage.classList.add('active');
+            this.currentPage = pageId;
+            
+            // Update URL hash
+            window.location.hash = pageId;
+            
+            // Update nav active state
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.toggle('active', link.dataset.page === pageId);
+            });
+            
+            // Refresh charts on statistics page
+            if (pageId === 'statistics') {
+                statistics.updateCharts();
+            }
+            
+            // Refresh achievements page
+            if (pageId === 'achievements') {
+                achievements.render();
+            }
+        }
+    }
+    
+    /**
+     * Setup cases page
+     */
+    setupCasesPage() {
+        const caseSearch = document.getElementById('caseSearch');
+        const caseFilter = document.getElementById('caseFilter');
+        
+        if (caseSearch) {
+            caseSearch.addEventListener('input', debounce((e) => {
+                this.renderCases(e.target.value);
+            }, 300));
+        }
+        
+        if (caseFilter) {
+            // Populate filter options
+            CASES.forEach(caseData => {
+                const option = document.createElement('option');
+                option.value = caseData.id;
+                option.textContent = caseData.name;
+                caseFilter.appendChild(option);
+            });
+            
+            caseFilter.addEventListener('change', (e) => {
+                this.renderCases(null, e.target.value);
+            });
+        }
+    }
+    
+    /**
+     * Render cases grid
+     * @param {string} search - Search query
+     * @param {string} filter - Filter by case ID
+     */
+    renderCases(search = '', filter = 'all') {
+        const grid = document.getElementById('casesGrid');
+        if (!grid) return;
+        
+        let filteredCases = CASES;
+        
+        // Apply search filter
+        if (search) {
+            filteredCases = filteredCases.filter(c => 
+                c.name.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+        
+        // Apply category filter
+        if (filter !== 'all') {
+            filteredCases = filteredCases.filter(c => c.id === filter);
+        }
+        
+        grid.innerHTML = filteredCases.map(caseData => `
+            <div class="case-card" data-case="${caseData.id}" onclick="ui.selectCase('${caseData.id}')">
+                <div class="case-image">${caseData.image}</div>
+                <h3>${caseData.name}</h3>
+                <p style="color: var(--text-secondary); margin: 0.5rem 0;">${caseData.description}</p>
+                <p class="case-price">${formatCurrency(caseData.price)}</p>
+            </div>
+        `).join('');
+    }
+    
+    /**
+     * Select case for opening
+     * @param {string} caseId - Case ID
+     */
+    selectCase(caseId) {
+        audioManager.play('click');
+        const caseData = CASES.find(c => c.id === caseId);
+        if (!caseData) return;
+        
+        this.selectedCase = caseData;
+        
+        // Update open case page
+        document.getElementById('openingCaseName').textContent = caseData.name;
+        document.getElementById('openingCasePrice').textContent = formatCurrency(caseData.price);
+        
+        // Initialize spinner
+        const reel = document.getElementById('spinnerReel');
+        spinner.initialize(caseData.items, reel);
+        
+        // Navigate to open case page
+        this.navigateTo('open-case');
+    }
+    
+    /**
+     * Setup open case page
+     */
+    setupOpenCasePage() {
+        const btnOpenCase = document.getElementById('btnOpenCase');
+        const btnOpenCaseNow = document.getElementById('btnOpenCaseNow');
+        const qtyButtons = document.querySelectorAll('.btn-qty');
+        
+        if (btnOpenCase) {
+            btnOpenCase.addEventListener('click', () => app.openCase());
+        }
+        
+        if (btnOpenCaseNow) {
+            btnOpenCaseNow.addEventListener('click', () => {
+                if (CASES.length > 0) {
+                    this.selectCase(CASES[0].id);
+                }
+            });
+        }
+        
+        qtyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                qtyButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                app.setQuantity(parseInt(btn.dataset.qty));
+            });
+        });
+    }
+    
+    /**
+     * Setup inventory page
+     */
+    setupInventoryPage() {
+        const inventorySearch = document.getElementById('inventorySearch');
+        const inventorySort = document.getElementById('inventorySort');
+        const btnSellSelected = document.getElementById('btnSellSelected');
+        const btnSellAll = document.getElementById('btnSellAll');
+        const btnExport = document.getElementById('btnExportInventory');
+        const btnImport = document.getElementById('btnImportInventory');
+        
+        if (inventorySearch) {
+            inventorySearch.addEventListener('input', debounce((e) => {
+                inventory.setSearch(e.target.value);
+            }, 300));
+        }
+        
+        if (inventorySort) {
+            inventorySort.addEventListener('change', (e) => {
+                inventory.setSort(e.target.value);
+            });
+        }
+        
+        if (btnSellSelected) {
+            btnSellSelected.addEventListener('click', () => {
+                const selected = Array.from(inventory.selectedItems);
+                if (selected.length === 0) {
+                    showToast('No items selected', 'info');
+                    return;
+                }
+                
+                const total = inventory.sellItems(selected);
+                app.addFunds(total);
+                showToast(`Sold ${selected.length} items for ${formatCurrency(total)}`, 'success');
+            });
+        }
+        
+        if (btnSellAll) {
+            btnSellAll.addEventListener('click', () => {
+                if (inventory.items.length === 0) {
+                    showToast('Inventory is empty', 'info');
+                    return;
+                }
+                
+                if (confirm('Are you sure you want to sell all items?')) {
+                    const total = inventory.sellAll();
+                    app.addFunds(total);
+                    showToast(`Sold all items for ${formatCurrency(total)}`, 'success');
+                }
+            });
+        }
+        
+        if (btnExport) {
+            btnExport.addEventListener('click', () => {
+                inventory.export();
+            });
+        }
+        
+        if (btnImport) {
+            btnImport.addEventListener('click', () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = (e) => {
+                    if (e.target.files[0]) {
+                        inventory.import(e.target.files[0]);
+                    }
+                };
+                input.click();
+            });
+        }
+    }
+    
+    /**
+     * Setup settings page
+     */
+    setupSettingsPage() {
+        const masterVolume = document.getElementById('masterVolume');
+        const muteAll = document.getElementById('muteAll');
+        const themeSelect = document.getElementById('themeSelect');
+        const reduceMotion = document.getElementById('reduceMotion');
+        const btnResetData = document.getElementById('btnResetData');
+        const btnClearInventory = document.getElementById('btnClearInventory');
+        
+        if (masterVolume) {
+            masterVolume.addEventListener('input', (e) => {
+                audioManager.setVolume(e.target.value);
+            });
+        }
+        
+        if (muteAll) {
+            muteAll.addEventListener('change', (e) => {
+                audioManager.setMuted(e.target.checked);
+            });
+        }
+        
+        if (themeSelect) {
+            const savedTheme = loadFromStorage('theme', 'dark');
+            themeSelect.value = savedTheme;
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            themeSelect.addEventListener('change', (e) => {
+                document.documentElement.setAttribute('data-theme', e.target.value);
+                saveToStorage('theme', e.target.value);
+            });
+        }
+        
+        if (reduceMotion) {
+            reduceMotion.addEventListener('change', (e) => {
+                saveToStorage('reduceMotion', e.target.checked);
+            });
+        }
+        
+        if (btnResetData) {
+            btnResetData.addEventListener('click', () => {
+                if (confirm('Are you sure you want to reset ALL data? This cannot be undone!')) {
+                    clearStorage();
+                    location.reload();
+                }
+            });
+        }
+        
+        if (btnClearInventory) {
+            btnClearInventory.addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear your inventory?')) {
+                    inventory.clear();
+                    showToast('Inventory cleared', 'success');
+                }
+            });
+        }
+    }
+    
+    /**
+     * Setup verification page
+     */
+    setupVerificationPage() {
+        const btnGenerateClientSeed = document.getElementById('btnGenerateClientSeed');
+        const btnVerify = document.getElementById('btnVerify');
+        
+        if (btnGenerateClientSeed) {
+            btnGenerateClientSeed.addEventListener('click', () => {
+                provablyFair.generateClientSeed();
+                showToast('New client seed generated', 'success');
+            });
+        }
+        
+        if (btnVerify) {
+            btnVerify.addEventListener('click', async () => {
+                const serverSeed = document.getElementById('verifyServerSeed').value;
+                const clientSeed = document.getElementById('verifyClientSeed').value;
+                const nonce = parseInt(document.getElementById('verifyNonce').value);
+                const resultDiv = document.getElementById('verificationResult');
+                
+                if (!serverSeed || !clientSeed || isNaN(nonce)) {
+                    resultDiv.className = 'verification-result error';
+                    resultDiv.textContent = 'Please fill in all fields';
+                    return;
+                }
+                
+                // Verify the roll
+                const result = await ProvablyFairSystem.verifyRoll(serverSeed, clientSeed, nonce, 0);
+                
+                resultDiv.className = `verification-result ${result.valid ? 'success' : 'error'}`;
+                resultDiv.innerHTML = `
+                    <strong>${result.message}</strong><br>
+                    Calculated Hash: ${result.calculatedHash}<br>
+                    Calculated Result: ${result.calculatedResult}
+                `;
+            });
+        }
+    }
+    
+    /**
+     * Setup modals
+     */
+    setupModals() {
+        // Item modal
+        const itemModal = document.getElementById('itemModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalBtnSell = document.getElementById('modalBtnSell');
+        
+        if (modalClose) {
+            modalClose.addEventListener('click', () => {
+                itemModal.classList.remove('show');
+            });
+        }
+        
+        if (itemModal) {
+            itemModal.addEventListener('click', (e) => {
+                if (e.target === itemModal) {
+                    itemModal.classList.remove('show');
+                }
+            });
+        }
+        
+        if (modalBtnSell) {
+            modalBtnSell.addEventListener('click', () => {
+                const itemId = modalBtnSell.dataset.itemId;
+                if (itemId) {
+                    const item = inventory.getItem(itemId);
+                    if (item) {
+                        const value = inventory.sellItem(itemId);
+                        app.addFunds(value);
+                        itemModal.classList.remove('show');
+                        showToast(`Sold for ${formatCurrency(value)}`, 'success');
+                    }
+                }
+            });
+        }
+        
+        // Deposit modal
+        const depositModal = document.getElementById('depositModal');
+        const depositModalClose = document.getElementById('depositModalClose');
+        const btnDeposit = document.getElementById('btnDeposit');
+        const btnCustomDeposit = document.getElementById('btnCustomDeposit');
+        
+        if (btnDeposit) {
+            btnDeposit.addEventListener('click', () => {
+                audioManager.play('click');
+                depositModal.classList.add('show');
+            });
+        }
+        
+        if (depositModalClose) {
+            depositModalClose.addEventListener('click', () => {
+                depositModal.classList.remove('show');
+            });
+        }
+        
+        if (depositModal) {
+            depositModal.addEventListener('click', (e) => {
+                if (e.target === depositModal) {
+                    depositModal.classList.remove('show');
+                }
+            });
+        }
+        
+        // Deposit amount buttons
+        document.querySelectorAll('.btn-deposit-amount').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const amount = parseFloat(btn.dataset.amount);
+                app.addFunds(amount);
+                depositModal.classList.remove('show');
+                showToast(`Added ${formatCurrency(amount)}`, 'success');
+            });
+        });
+        
+        if (btnCustomDeposit) {
+            btnCustomDeposit.addEventListener('click', () => {
+                const input = document.getElementById('customDepositAmount');
+                const amount = parseFloat(input.value);
+                if (amount > 0) {
+                    app.addFunds(amount);
+                    depositModal.classList.remove('show');
+                    showToast(`Added ${formatCurrency(amount)}`, 'success');
+                    input.value = '';
+                }
+            });
+        }
+    }
+    
+    /**
+     * Show item inspection modal
+     * @param {string} itemId - Item ID
+     */
+    showItemModal(itemId) {
+        const item = inventory.getItem(itemId);
+        if (!item) return;
+        
+        const modal = document.getElementById('itemModal');
+        const modalBtnSell = document.getElementById('modalBtnSell');
+        
+        document.getElementById('modalItemImage').textContent = item.image;
+        document.getElementById('modalItemName').textContent = item.name;
+        document.getElementById('modalItemRarity').textContent = item.rarity;
+        document.getElementById('modalItemRarity').style.color = getRarityColor(item.rarity);
+        document.getElementById('modalItemFloat').textContent = item.float.toFixed(6);
+        document.getElementById('modalItemWear').textContent = item.wearCondition || getWearCondition(item.float);
+        document.getElementById('modalItemPattern').textContent = item.patternId;
+        document.getElementById('modalItemValue').textContent = formatCurrency(item.finalValue);
+        document.getElementById('modalItemDate').textContent = formatDate(item.dateObtained);
+        document.getElementById('modalItemCase').textContent = item.caseSource;
+        
+        modalBtnSell.dataset.itemId = itemId;
+        
+        modal.classList.add('show');
+    }
+    
+    /**
+     * Update wallet display
+     * @param {number} amount - Wallet amount
+     */
+    updateWalletDisplay(amount) {
+        const walletEl = document.getElementById('walletAmount');
+        if (walletEl) {
+            walletEl.textContent = formatCurrency(amount);
+        }
+    }
+    
+    /**
+     * Add recent drop to feed
+     * @param {object} item - Dropped item
+     */
+    addRecentDrop(item) {
+        const feed = document.getElementById('dropsFeed');
+        if (!feed) return;
+        
+        const dropEl = document.createElement('div');
+        dropEl.className = `item-card ${getRarityClass(item.rarity)}`;
+        dropEl.style.minWidth = '150px';
+        dropEl.innerHTML = `
+            <div class="item-card-image" style="border-bottom: 3px solid ${getRarityColor(item.rarity)}">
+                ${item.image}
+            </div>
+            <div class="item-card-name" title="${item.name}">${item.name}</div>
+            <div class="item-card-value">${formatCurrency(item.finalValue || item.baseValue)}</div>
+        `;
+        
+        feed.insertBefore(dropEl, feed.firstChild);
+        
+        // Keep only last 20 drops
+        while (feed.children.length > 20) {
+            feed.removeChild(feed.lastChild);
+        }
+    }
+}
+
+// Create global instance
+const ui = new UIManager();
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { UIManager, ui };
+}
+/**
+ * CS2 Case Opening Simulator - Main Application
+ * Initializes and coordinates all systems
+ */
+
+class CS2CaseSimulator {
+    constructor() {
+        this.wallet = 100; // Starting balance
+        this.openQuantity = 1;
+        this.isOpening = false;
+        this.autoOpenInterval = null;
+        
+        this.initialize();
+    }
+    
+    /**
+     * Initialize the application
+     */
+    async initialize() {
+        // Load saved wallet
+        const savedWallet = loadFromStorage('wallet', 100);
+        this.wallet = savedWallet;
+        
+        // Update UI
+        ui.updateWalletDisplay(this.wallet);
+        
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.onReady());
+        } else {
+            this.onReady();
+        }
+    }
+    
+    /**
+     * Called when DOM is ready
+     */
+    onReady() {
+        console.log('CS2 Case Simulator initialized');
+        
+        // Resume audio context on first user interaction
+        document.addEventListener('click', () => {
+            audioManager.resume();
+        }, { once: true });
+        
+        // Check achievements periodically
+        setInterval(() => {
+            achievements.checkAll();
+        }, 5000);
+        
+        // Handle keyboard shortcuts
+        this.setupKeyboardShortcuts();
+    }
+    
+    /**
+     * Setup keyboard shortcuts
+     */
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Space to open case (when on open-case page)
+            if (e.code === 'Space' && ui.currentPage === 'open-case' && !this.isOpening) {
+                e.preventDefault();
+                this.openCase();
+            }
+            
+            // Escape to close modals
+            if (e.code === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.classList.remove('show');
+                });
+            }
+        });
+    }
+    
+    /**
+     * Add funds to wallet
+     * @param {number} amount - Amount to add
+     */
+    addFunds(amount) {
+        this.wallet += amount;
+        saveToStorage('wallet', this.wallet);
+        ui.updateWalletDisplay(this.wallet);
+    }
+    
+    /**
+     * Deduct funds from wallet
+     * @param {number} amount - Amount to deduct
+     * @returns {boolean} Success status
+     */
+    deductFunds(amount) {
+        if (this.wallet >= amount) {
+            this.wallet -= amount;
+            saveToStorage('wallet', this.wallet);
+            ui.updateWalletDisplay(this.wallet);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Set open quantity
+     * @param {number} qty - Quantity (1, 5, or 10)
+     */
+    setQuantity(qty) {
+        this.openQuantity = clamp(qty, 1, 10);
+    }
+    
+    /**
+     * Open a case
+     */
+    async openCase() {
+        if (this.isOpening || !ui.selectedCase) return;
+        
+        const caseData = ui.selectedCase;
+        const totalCost = caseData.price * this.openQuantity;
+        
+        // Check funds
+        if (!this.deductFunds(totalCost)) {
+            showToast('Insufficient funds! Please deposit more.', 'error');
+            return;
+        }
+        
+        this.isOpening = true;
+        const btnOpen = document.getElementById('btnOpenCase');
+        if (btnOpen) btnOpen.disabled = true;
+        
+        // Record statistics
+        statistics.recordCaseOpening(totalCost);
+        
+        // Open multiple cases based on quantity
+        for (let i = 0; i < this.openQuantity; i++) {
+            await this.openSingleCase(caseData);
+        }
+        
+        this.isOpening = false;
+        if (btnOpen) btnOpen.disabled = false;
+        
+        // Check achievements after opening
+        achievements.checkAll();
+        
+        // Auto-open mode
+        const autoOpenMode = document.getElementById('autoOpenMode');
+        if (autoOpenMode && autoOpenMode.checked) {
+            this.startAutoOpen();
+        }
+    }
+    
+    /**
+     * Open a single case
+     * @param {object} caseData - Case data
+     */
+    async openSingleCase(caseData) {
+        const fastMode = document.getElementById('fastOpenMode')?.checked || false;
+        
+        // Determine result using provably fair system
+        const rollResult = await provablyFair.getNextRoll(1000000);
+        
+        // Select item based on roll
+        const selectedItem = this.selectItemFromRoll(caseData.items, rollResult);
+        
+        // Generate full item data
+        const item = {
+            ...selectedItem,
+            float: generateFloat(),
+            patternId: generatePatternId(),
+            wearCondition: getWearCondition(generateFloat())
+        };
+        
+        // Calculate final value
+        item.finalValue = inventory.calculateItemValue(item);
+        
+        // Spin the reel
+        spinner.reset();
+        
+        // Find target index (place winning item at a random position in the reel)
+        const targetIndex = Math.floor(Math.random() * 30) + 50; // Between 50-80
+        
+        // Temporarily modify reel to include winning item at target position
+        spinner.items[targetIndex] = item;
+        spinner.renderReel();
+        
+        // Start animation
+        const result = await spinner.spin(targetIndex, fastMode);
+        
+        // Add to inventory
+        const addedItem = inventory.addItem(result);
+        
+        // Record in statistics
+        statistics.recordItemDrop(addedItem);
+        
+        // Record in provably fair history
+        provablyFair.recordRoll({
+            itemName: result.name,
+            rarity: result.rarity,
+            value: addedItem.finalValue
+        });
+        
+        // Show result
+        this.showResult(addedItem);
+        
+        // Add to recent drops
+        ui.addRecentDrop(addedItem);
+        
+        // Update wallet display
+        ui.updateWalletDisplay(this.wallet);
+    }
+    
+    /**
+     * Select item based on roll result
+     * @param {Array} items - Available items
+     * @param {number} roll - Roll result
+     * @returns {object} Selected item
+     */
+    selectItemFromRoll(items, roll) {
+        // First determine rarity based on probabilities
+        const rarityKey = determineRarity();
+        
+        // Filter items by determined rarity
+        let rarityItems = items.filter(item => 
+            item.rarity.toLowerCase() === rarityKey.toLowerCase()
+        );
+        
+        // If no items of that rarity, use all items
+        if (rarityItems.length === 0) {
+            rarityItems = items;
+        }
+        
+        // Select random item from filtered list
+        return rarityItems[Math.floor(Math.random() * rarityItems.length)];
+    }
+    
+    /**
+     * Show result card
+     * @param {object} item - Result item
+     */
+    showResult(item) {
+        const resultCard = document.getElementById('resultCard');
+        const resultDisplay = document.getElementById('resultDisplay');
+        
+        if (!resultCard) return;
+        
+        resultCard.className = `item-card result-card ${getRarityClass(item.rarity)}`;
+        if (item.rarity.toUpperCase() === 'GOLD') {
+            resultCard.classList.add('gold-reveal');
+        }
+        
+        resultCard.innerHTML = `
+            <div class="item-card-image" style="border-bottom: 4px solid ${getRarityColor(item.rarity)}">
+                ${item.image}
+            </div>
+            <div class="item-card-name">${item.name}</div>
+            <div class="item-card-value">${formatCurrency(item.finalValue)}</div>
+            <div class="item-card-float">Float: ${item.float.toFixed(6)}</div>
+            <div class="item-card-float">${item.wearCondition}</div>
+        `;
+        
+        resultCard.classList.add('show');
+        
+        // Allow clicking to inspect
+        resultCard.onclick = () => {
+            const newItem = inventory.items.find(i => i.id.includes(item.id));
+            if (newItem) {
+                ui.showItemModal(newItem.id);
+            }
+        };
+    }
+    
+    /**
+     * Start auto-open mode
+     */
+    startAutoOpen() {
+        if (this.autoOpenInterval) return;
+        
+        this.autoOpenInterval = setInterval(() => {
+            if (this.wallet >= ui.selectedCase?.price) {
+                this.openCase();
+            } else {
+                this.stopAutoOpen();
+                showToast('Auto-open stopped: Insufficient funds', 'info');
+            }
+        }, 8000);
+    }
+    
+    /**
+     * Stop auto-open mode
+     */
+    stopAutoOpen() {
+        if (this.autoOpenInterval) {
+            clearInterval(this.autoOpenInterval);
+            this.autoOpenInterval = null;
+            
+            const autoOpenMode = document.getElementById('autoOpenMode');
+            if (autoOpenMode) autoOpenMode.checked = false;
+        }
+    }
+}
+
+// Create global instance
+const app = new CS2CaseSimulator();
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { CS2CaseSimulator, app };
+}
